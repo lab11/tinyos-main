@@ -1,0 +1,39 @@
+#-*-Makefile-*- vim:syntax=make
+PLATFORM = cc2538em
+
+#LINKERFILE_PREFIX?=sam3s-ek-flash
+#SAM-BA?=/dev/ttyUSB10
+#START_ADDR?=0x400000
+#BOARD?=at91sam3s4-ek
+
+ifdef CC2520_CHANNEL
+PFLAGS += -DCC2520_DEF_CHANNEL=$(CC2520_CHANNEL)
+endif
+
+# Include all of the "foundation firmware" from TI
+PFLAGS += -I$(TOSROOT)/support/sdk/c/cc2538
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/adc.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/aes.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/cpu.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/flash.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/sha256.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/ccm.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/ssi.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/debug.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/i2c.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/interrupt.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/ioc.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/sys_ctrl.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/gptimer.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/gpio.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/udma.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/uart.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/watchdog.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/pka.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/systick.c
+PFLAGS += $(TOSROOT)/support/sdk/c/cc2538/sleepmode.c
+
+$(call TOSMake_include_platform,cc2538em)
+
+cc2538em: $(BUILD_DEPS)
+	@:
