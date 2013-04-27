@@ -76,6 +76,9 @@ DEFAULT_PROGRAM ?= sam-ba
 # out with call in there.  I don't know why.
 #$(if $(PROGRAM),,$(call TOSMake_include,sam3/$(DEFAULT_PROGRAM).extra))
 
+program: exe0
+	uniflash.sh -ccxml $(TOSROOT)/tos/platforms/$(PLATFORM)/cc2538em.ccxml -targetOp reset -program $(MAIN_EXE) -targetOp reset
+
 exe: exe0 bytes FORCE
 	@:
 
