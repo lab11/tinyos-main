@@ -6,6 +6,8 @@
 push ( @includes, qw(
   %T/chips/cc2538
   %T/chips/cc2538/gpio
+  %T/chips/cc2538/timer
+  %T/chips/cc2538/timer/interfaces
   %T/lib/timer
   %T/lib/serial
   %T/lib/power

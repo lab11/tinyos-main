@@ -99,12 +99,13 @@ const lockPageCCA_t __cca =
   FLASH_START_ADDR 				// Vector table located at flash start address
 };
 
+void SleepTimerIrqHandler() __attribute__((weak, alias("IntDefaultHandler")));
 
 __attribute__ ((section(".vectors"), used))
 void (* const gVectors[])(void) =
 {
    (void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)), // Stack pointer
-   ResetISR,							   // Reset handler
+   ResetISR,                 // Reset handler
    NmiSR,                                  // The NMI handler
    FaultISR,                               // The hard fault handler
    IntDefaultHandler,                      // 4 The MPU fault handler
@@ -151,7 +152,7 @@ void (* const gVectors[])(void) =
    IntDefaultHandler,                      // 45 FLASH Control
    IntDefaultHandler,                      // 46 AES
    IntDefaultHandler,                      // 47 PKA
-   IntDefaultHandler,                      // 48 Sleep Timer
+   IntDefaultHandler,                      // 48 Sleep Timer (Alternate)
    IntDefaultHandler,                      // 49 MacTimer
    IntDefaultHandler,                      // 50 SSI1 Rx and Tx
    IntDefaultHandler,                      // 51 Timer 3 subtimer A
@@ -265,10 +266,11 @@ void (* const gVectors[])(void) =
    IntDefaultHandler,                      // 158 RFCORE Error
    IntDefaultHandler,                      // 159 AES
    IntDefaultHandler,                      // 160 PKA
-   IntDefaultHandler,                      // 161 SMTimer
+   SleepTimerIrqHandler,                   // 161 SMTimer
    IntDefaultHandler,                      // 162 MACTimer
 #endif
 };
+
 
 //*****************************************************************************
 //
