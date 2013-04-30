@@ -12,14 +12,36 @@
 module HplTimerEventP {
   provides {
     interface HplTimerEvent as SleepTimerEvent;
+    interface HplTimerEvent as GpTimer0AEvent;
+    interface HplTimerEvent as GpTimer1AEvent;
+    interface HplTimerEvent as GpTimer2Event;
+    interface HplTimerEvent as GpTimer3Event;
   }
+uses interface Leds;
 }
 
 implementation {
 
   // Interrupt handler for the sleep timer. Specified in vector table directly.
-  void SleepTimerIrqHandler() @C() @spontaneous() {
+  void SleepTimerIrqHandler() @C() @spontaneous() @hwevent() {
     signal SleepTimerEvent.fired();
+  }
+
+  void GpTimer0AIrqHandler() @C() @spontaneous() @hwevent() {
+    signal GpTimer0AEvent.fired();
+  }
+
+  void GpTimer1AIrqHandler() @C() @spontaneous() @hwevent() {
+    signal GpTimer1AEvent.fired();
+  }
+
+  void GpTimer2IrqHandler() @C() @spontaneous() @hwevent() {
+  	call Leds.led2On();
+    signal GpTimer2Event.fired();
+  }
+
+  void GpTimer3IrqHandler() @C() @spontaneous() @hwevent() {
+    signal GpTimer3Event.fired();
   }
 
 }

@@ -100,6 +100,10 @@ const lockPageCCA_t __cca =
 };
 
 void SleepTimerIrqHandler() __attribute__((weak, alias("IntDefaultHandler")));
+void GpTimer0AIrqHandler() __attribute__((weak, alias("IntDefaultHandler")));
+void GpTimer1AIrqHandler() __attribute__((weak, alias("IntDefaultHandler")));
+void GpTimer2IrqHandler() __attribute__((weak, alias("IntDefaultHandler")));
+void GpTimer3IrqHandler() __attribute__((weak, alias("IntDefaultHandler")));
 
 __attribute__ ((section(".vectors"), used))
 void (* const gVectors[])(void) =
@@ -139,12 +143,12 @@ void (* const gVectors[])(void) =
    0,                                      // 32 Reserved
    0,                                      // 33 Reserved
    IntDefaultHandler,                      // 34 Watchdog timer, timer 0
-   IntDefaultHandler,                      // 35 Timer 0 subtimer A
+   GpTimer0AIrqHandler,                      // 35 Timer 0 subtimer A
    IntDefaultHandler,                      // 36 Timer 0 subtimer B
-   IntDefaultHandler,                      // 37 Timer 1 subtimer A
+   GpTimer1AIrqHandler,                      // 37 Timer 1 subtimer A
    IntDefaultHandler,                      // 38 Timer 1 subtimer B
-   IntDefaultHandler,                      // 39 Timer 2 subtimer A
-   IntDefaultHandler,                      // 40 Timer 2 subtimer B
+   GpTimer2IrqHandler,                      // 39 Timer 2 subtimer A
+   GpTimer2IrqHandler,                      // 40 Timer 2 subtimer B
    IntDefaultHandler,                      // 41 Analog Comparator 0
    IntDefaultHandler,                      // 42 RFCore Rx/Tx
    IntDefaultHandler,                      // 43 RFCore Error
@@ -155,7 +159,7 @@ void (* const gVectors[])(void) =
    IntDefaultHandler,                      // 48 Sleep Timer (Alternate)
    IntDefaultHandler,                      // 49 MacTimer
    IntDefaultHandler,                      // 50 SSI1 Rx and Tx
-   IntDefaultHandler,                      // 51 Timer 3 subtimer A
+   GpTimer3IrqHandler,                      // 51 Timer 3 subtimer A
    IntDefaultHandler,                      // 52 Timer 3 subtimer B
    0,                                      // 53 Reserved
    0,                                      // 54 Reserved

@@ -60,4 +60,6 @@ implementation {
     return compare_val;
   }
 
+  default async event void HplSleepTimer.fired () { }
+
 }

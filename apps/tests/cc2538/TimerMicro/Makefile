@@ -1,0 +1,2 @@
+COMPONENT=TimerMicroC
+include $(MAKERULES)
