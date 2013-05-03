@@ -32,7 +32,6 @@ generic module HplGpTimerP (uint32_t base,
   }
   uses {
     interface HplTimerEvent;
-interface Leds;
   }
 }
 
@@ -51,7 +50,7 @@ implementation {
 
   async event void HplTimerEvent.fired () {
     TimerIntClear(base, GPTIMER_TIMA_TIMEOUT);
-     TimerDisable(base, timer);
+    TimerDisable(base, timer);
     signal HplGpTimer.fired();
   }
 
@@ -61,7 +60,6 @@ implementation {
     TimerIntEnable(base, GPTIMER_TIMA_TIMEOUT);
     IntEnable(interrupt);
     TimerEnable(base, timer);
-    call Leds.led2On();
   }
 
   async command void HplGpTimer.disable () {

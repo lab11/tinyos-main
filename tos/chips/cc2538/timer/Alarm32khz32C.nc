@@ -6,13 +6,15 @@
  */
 
 generic configuration Alarm32khz32C() {
-  provides interface Init;
-  provides interface Alarm<T32khz,uint32_t>;
+  provides {
+  	interface Init;
+    interface Alarm<T32khz,uint32_t>;
+  }
 }
 
 implementation {
   components new HalTimer32khz32C() as HardwareTimer32khz32;
-  components new HalAlarmP(T32khz, 32, uint32_t) as Alarm32khz32;
+  components new HalAlarmP(T32khz, 1, uint32_t) as Alarm32khz32;
 
   Init = Alarm32khz32;
   Alarm = Alarm32khz32;

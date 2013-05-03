@@ -6,7 +6,7 @@
  */
 
 generic module HalAlarmP (typedef frequency_tag,
-                          uint16_t freq_divisor,
+                          uint32_t freq_multiplier,
                           typedef size_type @integer()) @safe() {
   provides {
     interface Init;
@@ -40,10 +40,15 @@ implementation {
   }
 
   async command void Alarm.startAt (size_type t0, size_type dt) {
-  //  uint32_t freq = call HalTimer.getTimerFrequency();
-  //  dt = (dt*freq)/(uint32_t)freq_divisor + 1;
-    atomic
-    {
+
+    // This line will not always work (say if the clock is very slow.)
+    // - but for a 32MHz clock, there are 32 ticks per microsecond, so
+    //   we multiply each microsecond by 32.
+    // - for a 32kHz clock, there is one tick per 32kHz increment. So
+    //   we multiply by 1.
+    dt = dt * freq_multiplier;
+
+    atomic {
       size_type now = call HalTimer.get();
       size_type elapsed = now - t0;
       if (elapsed >= dt) {

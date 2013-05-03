@@ -1,2 +1,3 @@
 COMPONENT=TimerMicroC
-include $(MAKERULES)
+TOSROOT=../../../..
+include $(TOSROOT)/Makefile.include

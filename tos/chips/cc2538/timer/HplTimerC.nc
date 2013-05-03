@@ -54,11 +54,4 @@ implementation {
 
   HplGpTimer32[0] = Hpl32Gp0.HplGpTimer;
   HplGpTimer32[1] = Hpl32Gp1.HplGpTimer;
-
-components LedsC;
-EventP.Leds -> LedsC;
-Hpl16Gp0.Leds -> LedsC;
-Hpl16Gp1.Leds -> LedsC;
-Hpl32Gp0.Leds -> LedsC;
-Hpl32Gp1.Leds -> LedsC;
 }

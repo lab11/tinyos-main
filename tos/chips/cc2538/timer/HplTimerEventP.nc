@@ -17,7 +17,6 @@ module HplTimerEventP {
     interface HplTimerEvent as GpTimer2Event;
     interface HplTimerEvent as GpTimer3Event;
   }
-uses interface Leds;
 }
 
 implementation {
@@ -36,7 +35,6 @@ implementation {
   }
 
   void GpTimer2IrqHandler() @C() @spontaneous() @hwevent() {
-  	call Leds.led2On();
     signal GpTimer2Event.fired();
   }
 

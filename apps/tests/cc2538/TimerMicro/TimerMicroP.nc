@@ -20,7 +20,6 @@ module TimerMicroP {
 implementation {
 
   event void Boot.booted () {
-    SysCtrlIOClockSet(SYS_CTRL_SYSDIV_32MHZ);
     call Leds.led0On();
     call Leds.led1Off();
     call Alarm.start(10000000);
