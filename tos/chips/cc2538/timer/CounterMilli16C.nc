@@ -4,7 +4,9 @@
  */
 
 configuration CounterMilli16C {
-  provides interface Counter<TMilli,uint16_t>;
+  provides {
+  	interface Counter<TMilli,uint16_t>;
+  }
 }
 implementation {
   components Counter32khz16C as HalCounter;

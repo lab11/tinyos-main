@@ -1,6 +1,6 @@
 
 /**
- * Provides a 32khz 32 bit timer from the hardware sleep timer.
+ * Provides a 32khz 32 bit counter from the hardware sleep timer.
  *
  * @author: Brad Campbell <bradjc@umich.edu>
  */

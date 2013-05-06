@@ -1,6 +1,6 @@
 
 /**
- * Whole stupid class to do a cast of a uint32_t to uint16_t.
+ * Whole stupid component to do a cast of a uint32_t to uint16_t.
  *
  * @author: Brad Campbell <bradjc@umich.edu>
  */

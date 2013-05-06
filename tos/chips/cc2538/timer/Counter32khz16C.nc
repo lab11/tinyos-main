@@ -6,14 +6,15 @@
  */
 
 configuration Counter32khz16C {
-  provides interface Counter<T32khz,uint16_t>;
+  provides {
+  	interface Counter<T32khz,uint16_t>;
+  }
 }
 implementation {
   components Counter32khz16P;
-  components Counter32khz32C as CounterFrom;
+  components HalCounter32khz32C as CounterFrom;
 
   Counter32khz16P.CounterFrom -> CounterFrom.Counter;
 
   Counter = Counter32khz16P.Counter;
 }
-
