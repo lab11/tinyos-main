@@ -16,8 +16,8 @@ implementation {
   components new HalTimer32khz32C() as HardwareTimer32khz32;
   components new HalAlarmP(T32khz, 1, uint32_t) as Alarm32khz32;
 
-  Init = Alarm32khz32;
-  Alarm = Alarm32khz32;
+  Init = Alarm32khz32.Init;
+  Alarm = Alarm32khz32.Alarm;
 
   Alarm32khz32.HalTimer -> HardwareTimer32khz32.HalTimer;
 }

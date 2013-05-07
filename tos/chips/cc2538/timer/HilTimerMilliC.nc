@@ -54,11 +54,11 @@ implementation
   components new CounterToLocalTimeC(TMilli);
   components CounterMilli32C;
 
-  Init = AlarmMilli32C;
-  TimerMilli = VirtualizeTimerC;
-  LocalTime = CounterToLocalTimeC;
+  Init = AlarmMilli32C.Init;
+  TimerMilli = VirtualizeTimerC.Timer;
+  LocalTime = CounterToLocalTimeC.LocalTime;
 
-  VirtualizeTimerC.TimerFrom -> AlarmToTimerC;
-  AlarmToTimerC.Alarm -> AlarmMilli32C;
-  CounterToLocalTimeC.Counter -> CounterMilli32C;
+  VirtualizeTimerC.TimerFrom -> AlarmToTimerC.Timer;
+  AlarmToTimerC.Alarm -> AlarmMilli32C.Alarm;
+  CounterToLocalTimeC.Counter -> CounterMilli32C.Counter;
 }

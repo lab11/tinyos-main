@@ -18,5 +18,5 @@ implementation {
 
   PlatformP.MoteClockInit -> MoteClockC.MoteClockInit;
 
-  Init = PlatformP;
+  Init = PlatformP.Init;
 }

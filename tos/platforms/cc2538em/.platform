@@ -22,6 +22,7 @@ push ( @includes, qw(
   -nostartfiles
   -fnesc-target=env
   -fnesc-no-debug
+  -Wnesc-implicit-conn
 
 );
 

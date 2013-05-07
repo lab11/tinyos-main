@@ -47,9 +47,9 @@ implementation {
   components CounterMilli32C as Counter;
   components new TransformAlarmC(TMilli,uint32_t,T32khz,uint32_t,5) as Transform;
 
-  Init = AlarmFrom;
-  Alarm = Transform;
+  Init = AlarmFrom.Init;
+  Alarm = Transform.Alarm;
 
-  Transform.AlarmFrom -> AlarmFrom;
-  Transform.Counter -> Counter;
+  Transform.AlarmFrom -> AlarmFrom.Alarm;
+  Transform.Counter -> Counter.Counter;
 }
