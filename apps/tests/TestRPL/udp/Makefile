@@ -31,4 +31,5 @@ PFLAGS+=-DIN6_PREFIX=\"aaaa::/64\"
 
 # enable printf
 CFLAGS += -DNEW_PRINTF_SEMANTICS -DPRINTFUART_ENABLED -DPRINTF_BUFFER_SIZE=1024
-include $(MAKERULES)
+TINYOS_ROOT_DIR?=../../../..
+include $(TINYOS_ROOT_DIR)/Makefile.include

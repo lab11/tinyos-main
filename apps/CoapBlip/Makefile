@@ -128,4 +128,5 @@ CFLAGS += -DCOAP_CLIENT_DEST=\"fec0::100\"
 #CFLAGS += -DCOAP_CLIENT_DEST=\"2a01:c911:0:2120:215:58ff:fe0b:8bb8\"
 
 CFLAGS += -I.
-include $(MAKERULES)
+TINYOS_ROOT_DIR?=../..
+include $(TINYOS_ROOT_DIR)/Makefile.include
