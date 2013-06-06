@@ -9,7 +9,7 @@
 # CODENAME	which part of the repository to place this build in.
 #
 # REPO_DEST	must contain a conf/distributions file for reprepro to work
-#		properly.   One can be copied from $(TOSROOT)/tools/repo/conf.
+#		properly.   One can be copied from $(TINYOS_ROOT_DIR)/tools/repo/conf.
 #
 # we use opt for these tools to avoid conflicting with placement from normal
 # distribution paths (debian or ubuntu repositories).

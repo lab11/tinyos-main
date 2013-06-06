@@ -24,7 +24,7 @@
 # CODENAME	which part of the repository to place this build in.
 #
 # REPO_DEST	must contain a conf/distributions file for reprepro to work
-#		properly.   One can be copied from $(TOSROOT)/tools/repo/conf.
+#		properly.   One can be copied from $(TINYOS_ROOT_DIR)/tools/repo/conf.
 #
 # Experimental tools go in /opt/msp430-<ver> to avoid conflicting with tools
 # distributed with the major distibutions.
