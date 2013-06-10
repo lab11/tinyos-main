@@ -1,0 +1,17 @@
+#-*-Makefile-*- vim:syntax=make
+
+PFLAGS += -I%T/platforms/micaz/sim
+PFLAGS += -I%T/platforms/micaz
+PFLAGS += -I%T/platforms/mica
+PFLAGS += -I%T/platforms/micaz/chips/cc2420
+PFLAGS += -I%T/chips/cc2420
+PFLAGS += -I%T/chips/atm128
+PFLAGS += -I%T/chips/atm128/adc
+PFLAGS += -I%T/chips/atm128/pins
+PFLAGS += -I%T/chips/atm128/spi
+PFLAGS += -I%T/chips/atm128/timer
+PFLAGS += -I%T/lib/power
+PFLAGS += -I%T/lib/timer
+PFLAGS += -I%T/lib/serial
+
+PFLAGS += -fnesc-no-debug
