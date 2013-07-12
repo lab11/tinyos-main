@@ -44,7 +44,9 @@ implementation
     P_FILL,
     P_FLUSH,
     P_COMPARE,
-    P_ERASE
+    P_ERASE, 
+    P_POWER_DOWN, 
+    P_WAKE
   };
   uint8_t status = P_IDLE;
   uint8_t flashCmd[9];
@@ -54,33 +56,38 @@ implementation
 
   void complete(uint16_t crc) {
     uint8_t s = status;
-
     status = P_IDLE;
-    switch (s)
-      {
+    
+    switch (s) {
       default: break;
       case P_READ_CRC:
-	signal HplAt45db.crcDone(crc);
-	break;
+        signal HplAt45db.crcDone(crc);
+        break;
       case P_FILL:
-	signal HplAt45db.fillDone();
-	break;
+        signal HplAt45db.fillDone();
+        break;
       case P_FLUSH:
-	signal HplAt45db.flushDone();
-	break;
+        signal HplAt45db.flushDone();
+        break;
       case P_COMPARE:
-	signal HplAt45db.compareDone();
-	break;
+        signal HplAt45db.compareDone();
+        break;
       case P_ERASE:
-	signal HplAt45db.eraseDone();
-	break;
+        signal HplAt45db.eraseDone();
+        break;
       case P_READ:
-	signal HplAt45db.readDone();
-	break;
+        signal HplAt45db.readDone();
+        break;
       case P_WRITE:
-	signal HplAt45db.writeDone();
-	break;
-      }
+        signal HplAt45db.writeDone();
+        break;
+      case P_POWER_DOWN:
+        signal HplAt45db.powerDownDone();
+        break;
+      case P_WAKE:
+        signal HplAt45db.wakeDone();
+        break;
+    }
   }
 
   void requestFlashStatus() {
@@ -96,83 +103,77 @@ implementation
     uint8_t lphase;
     uint16_t crc = (uint16_t)data;
 
-    if (dataCount) // skip 0-byte ops
-      {
-	/* For a 3% speedup, we could use labels and goto *.
-	   But: very gcc-specific. Also, need to do
-	   asm ("ijmp" : : "z" (state))
-	   instead of goto *state
-	*/
+    if (dataCount) { // skip 0-byte ops
 
-	ptr = flashCmd;
-	lphase = P_SEND_CMD;
-	count = 4 + dontCare;
+      ptr = flashCmd;
+      lphase = P_SEND_CMD;
+      count = 4 + dontCare;
 
-	call HplAt45dbByte.select();
-	for (;;)
-	  {
-	    if (lphase == P_READ_CRC)
-	      {
-		crc = crcByte(crc, in);
+      call HplAt45dbByte.select();
+      for (;;) {
+        if (lphase == P_READ_CRC) {
+          crc = crcByte(crc, in);
+          --count;
+            
+          if (!count)
+            break;
+        }
+        else if (lphase == P_SEND_CMD) {
+          // Note: the dontCare bytes are read after the end of cmd...
+          out = *ptr++;
+          count--;
+          if (!count) {
+            lphase = status;
+            ptr = data;
+            count = dataCount;
+          }
+        }
+        else if (lphase == P_READ) {
+          *ptr++ = in;
+          --count;
+          if (!count)
+            break;
+        }
+        else if (lphase == P_WRITE) {
+          if (!count)
+            break;
 
-		--count;
-		if (!count)
-		  break;
-	      }
-	    else if (lphase == P_SEND_CMD)
-	      {
-		// Note: the dontCare bytes are read after the end of cmd...
-		out = *ptr++;
-		count--;
-		if (!count)
-		  {
-		    lphase = status;
-		    ptr = data;
-		    count = dataCount;
-		  }
-	      }
-	    else if (lphase == P_READ)
-	      {
-		*ptr++ = in;
-		--count;
-		if (!count)
-		  break;
-	      }
-	    else if (lphase == P_WRITE)
-	      {
-		if (!count)
-		  break;
-
-		out = *ptr++;
-		--count;
-	      }
-	    else /* P_COMMAND */
-	      break;
-	
-	    in = call FlashSpi.write(out);
-	  }
-	call HplAt45dbByte.deselect();
+          out = *ptr++;
+          --count;
+        }
+        else if (lphase == P_POWER_DOWN) {
+          break; 
+        }
+        else if (lphase == P_WAKE) {
+          break;
+        }
+        else /* P_COMMAND */
+          break;
+        
+        in = call FlashSpi.write(out);
       }
+      call HplAt45dbByte.deselect(); 
+    }
 
     call Resource.release();
     complete(crc);
   }
 
   event void Resource.granted() {
-    switch (status)
-      {
-      case P_WAIT_COMPARE: case P_WAIT_IDLE:
-	requestFlashStatus();
-	break;
+    switch (status) {
+      case P_WAIT_COMPARE: 
+      case P_WAIT_IDLE:
+        requestFlashStatus();
+        break;
       default:
-	doCommand();
-	break;
-      }
+        doCommand();
+        break;
+    }
   }
 
   void execCommand(uint8_t op, uint8_t reqCmd, uint8_t reqDontCare,
-		   at45page_t reqPage, at45pageoffset_t reqOffset,
-		   uint8_t * COUNT_NOK(reqCount) reqData, at45pageoffset_t reqCount) {
+    at45page_t reqPage, at45pageoffset_t reqOffset,
+    uint8_t * COUNT_NOK(reqCount) reqData, at45pageoffset_t reqCount) {
     status = op;
 
     // page (2 bytes) and highest bit of offset
@@ -199,19 +200,17 @@ implementation
   }
 
   event void HplAt45dbByte.idle() {
-    if (status == P_WAIT_COMPARE)
-      {
-	bool cstatus = call HplAt45dbByte.getCompareStatus();
-	call HplAt45dbByte.deselect();
-	call Resource.release();
-	signal HplAt45db.waitCompareDone(cstatus);
-      }
-    else
-      {
-	call HplAt45dbByte.deselect();
-	call Resource.release();
-	signal HplAt45db.waitIdleDone();
-      }
+    if (status == P_WAIT_COMPARE) {
+      bool cstatus = call HplAt45dbByte.getCompareStatus();
+      call HplAt45dbByte.deselect();
+      call Resource.release();
+      signal HplAt45db.waitCompareDone(cstatus);
+    }
+    else {
+      call HplAt45dbByte.deselect();
+      call Resource.release();
+      signal HplAt45db.waitIdleDone();
+    }
   }
 
   command void HplAt45db.fill(uint8_t cmd, at45page_t page) {
@@ -231,26 +230,46 @@ implementation
   }
 
   command void HplAt45db.read(uint8_t cmd,
-			      at45page_t page, at45pageoffset_t offset,
-			      uint8_t *pdata, at45pageoffset_t count) {
+                              at45page_t page, 
+                              at45pageoffset_t offset,
+                              uint8_t *pdata, 
+                              at45pageoffset_t count) {
+
     execCommand(P_READ, cmd, 5, page, offset, pdata, count);
   }
 
-  command void HplAt45db.readBuffer(uint8_t cmd, at45pageoffset_t offset,
-				    uint8_t *pdata, at45pageoffset_t count) {
+  command void HplAt45db.readBuffer(uint8_t cmd, 
+                                    at45pageoffset_t offset,
+                                    uint8_t *pdata, 
+                                    at45pageoffset_t count) {
+
     execCommand(P_READ, cmd, 2, 0, offset, pdata, count);
   }
 
   command void HplAt45db.crc(uint8_t cmd,
-			     at45page_t page, at45pageoffset_t offset,
-			     at45pageoffset_t count,
-			     uint16_t baseCrc) {
+                             at45page_t page, 
+                             at45pageoffset_t offset,
+                             at45pageoffset_t count,
+                             uint16_t baseCrc) {
+    
     execCommand(P_READ_CRC, cmd, 2, page, offset, TCAST(uint8_t * COUNT(count), baseCrc), count);
   }
 
   command void HplAt45db.write(uint8_t cmd,
-			       at45page_t page, at45pageoffset_t offset,
-			       uint8_t *pdata, at45pageoffset_t count) {
+                               at45page_t page, 
+                               at45pageoffset_t offset,
+                               uint8_t *pdata, 
+                               at45pageoffset_t count) {
+
     execCommand(P_WRITE, cmd, 0, page, offset, pdata, count);
   }
+
+  command void HplAt45db.deepPowerDown() {
+    execCommand(P_POWER_DOWN, AT45_C_DEEP_POWER_DOWN, 0, 0, 0, NULL, 1);
+  }
+
+  command void HplAt45db.wake() {
+    execCommand(P_WAKE, AT45_C_DEEP_POWER_RESUME, 0, 0, 0, NULL, 1);
+  }
+
 }
