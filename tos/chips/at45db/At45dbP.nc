@@ -221,11 +221,6 @@ implementation {
   event void HplAt45db.compareDone() {
     flashBusy = TRUE;
     buffer[checking].busy = TRUE;
-    // The 10us wait makes old mica motes (Atmega 103) happy, for
-    // some mysterious reason (w/o this wait, the first compare
-    // always fails, even though the compare after the rewrite
-    // succeeds...)
-    call BusyWait.wait(10);
     call HplAt45db.waitCompare();
   }
 
