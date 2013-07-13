@@ -43,6 +43,8 @@
 
 module OpoP @safe() {
   uses {
+    /* DS2411 ID reader */
+    interface ReadId48 as IdReader;
     /* Timers */
     interface Timer<TMilli> as WakeStartTimer;
     interface Timer<TMilli> as WakeStopTimer;
@@ -97,6 +99,7 @@ implementation {
   // State Variables
   bool firstBoot = TRUE; // When true, we export flash data to serial
   bool rxResponse = TRUE; //Fast ranging response or not
+  uint8_t m_id[6];
 
   // Timing and ranging
   uint32_t sfd_time = 0; // SFD trigger time.
@@ -163,6 +166,7 @@ implementation {
   */
   event void Boot.booted() {
     TACTL_RESTORE = TACTL;
+    call IdReader.read(&m_id[0]);
     call CC2420Packet.setPower(&packet, 31);
     call HplRV4162.writeSTBit();
     printf("BOOTED\n");
@@ -329,22 +333,29 @@ implementation {
       call RxGuardTimer.startOneShot(75);
     }
     else if (m_state == BASE_SEND) {
-      opo_rec_t *payload;
-      payload = (opo_rec_t*) call BaseSend.getPayload(&packet, 
-                                                      sizeof(opo_rec_t));
-      payload -> valid = opo_store_buffer[opo_buffer_index - 1].valid;
-      payload -> range = opo_store_buffer[opo_buffer_index - 1].range;
-      payload -> sequence = opo_store_buffer[opo_buffer_index - 1].sequence;
-      payload -> id = opo_store_buffer[opo_buffer_index - 1].id;
-      payload -> rssi = opo_store_buffer[opo_buffer_index - 1].rssi;
-      payload -> tx_pwr = opo_store_buffer[opo_buffer_index - 1].tx_pwr;
-      payload -> seconds = opo_store_buffer[opo_buffer_index - 1].seconds; 
-      payload -> minutes = opo_store_buffer[opo_buffer_index - 1].minutes; 
-      payload -> hours = opo_store_buffer[opo_buffer_index - 1].hours;
+      opo_bmsg_t *p;
+      int i;
+      p = (opo_bmsg_t*) call BaseSend.getPayload(&packet, sizeof(opo_bmsg_t));
+
+      p -> rec.valid = opo_store_buffer[opo_buffer_index - 1].valid;
+      p -> rec.range = opo_store_buffer[opo_buffer_index - 1].range;
+      p -> rec.sequence = opo_store_buffer[opo_buffer_index - 1].sequence;
+      for(i = 0; i < 6; i++) {
+        p -> rec.o_id[i] = opo_store_buffer[opo_buffer_index - 1].o_id[i];
+      }
+      p -> rec.rssi = opo_store_buffer[opo_buffer_index - 1].rssi;
+      p -> rec.tx_pwr = opo_store_buffer[opo_buffer_index - 1].tx_pwr;
+      p -> rec.seconds = opo_store_buffer[opo_buffer_index - 1].seconds; 
+      p -> rec.minutes = opo_store_buffer[opo_buffer_index - 1].minutes; 
+      p -> rec.hours = opo_store_buffer[opo_buffer_index - 1].hours;
+      
+      for(i = 0; i < 6; i++) {
+        p -> m_id[i] = m_id[i];
+      }
 
       call BaseSend.send(AM_BROADCAST_ADDR, 
                        &packet, 
-                       sizeof(opo_rec_t));
+                       sizeof(opo_bmsg_t));
     }
   }
 
@@ -377,12 +388,15 @@ implementation {
     m_state = BASE_SEND;
     call RfControl.stop();
     if(m_state != TX) {
+      int i;
       opo_rf_msg_t *mData = (opo_rf_msg_t *) payload;
       opo_store_buffer[opo_buffer_index].valid = flash_valid;
-      opo_store_buffer[opo_buffer_index].sequence = mData->sequence;
-      opo_store_buffer[opo_buffer_index].id = call AMPacket.source(msg);
+      opo_store_buffer[opo_buffer_index].sequence = mData -> sequence;
+      for(i = 0; i < 8; i++) {
+        opo_store_buffer[opo_buffer_index].o_id[i] = mData -> m_id[i];
+      } 
       opo_store_buffer[opo_buffer_index].rssi = call CC2420Packet.getRssi(msg);
-      opo_store_buffer[opo_buffer_index].tx_pwr = mData->tx_pwr;
+      opo_store_buffer[opo_buffer_index].tx_pwr = mData -> tx_pwr;
 
       atomic {
         rfValid = TRUE;
@@ -451,7 +465,13 @@ implementation {
     flash_r_addr += sizeof(opo_rec_t);
     
     if(opo_read_store.valid == flash_valid) {
-      printf("id:%u\n", opo_read_store.id);
+      int i = 0;
+      printf("m_id:");
+      for(i = 0; i < 8; i++) {
+        printf("%u", m_id[i]);
+      }
+      printf("\n");
+      printf("o_id:%u\n", opo_read_store.o_id);
       printf("r:%lu\n", opo_read_store.range);
       printf("sq:%lu\n", opo_read_store.sequence);
       printf("s:%u\n", opo_read_store.seconds);

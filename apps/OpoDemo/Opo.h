@@ -30,7 +30,7 @@ typedef nx_struct opo_rec_msg {
     nx_uint8_t valid; //validates data read from flash
 	nx_uint32_t range; // Range is given in micrometers to avoid decimals
     nx_uint32_t sequence; // Used to match nodes to the same broadcast
-    nx_uint16_t id; // ID Taken from Rf Packet Source Address
+    nx_uint8_t o_id[6]; // ID from transmitter's (other node's) ds2411
     nx_int8_t rssi;
     nx_uint8_t tx_pwr;
     nx_uint8_t seconds; 
@@ -38,7 +38,13 @@ typedef nx_struct opo_rec_msg {
     nx_uint8_t hours;
 } opo_rec_t;
 
+typedef nx_struct oppo_base_msg {
+    opo_rec_t rec;
+    nx_uint8_t m_id[6];
+} opo_bmsg_t;
+
 typedef nx_struct opo_range_msg {
+    nx_uint8_t m_id[6]; // ID from transmitter's (this node's) ds2411
     nx_uint32_t sequence; // A node unique identifier of our current broadcast
     nx_uint8_t tx_pwr;
 } opo_rf_msg_t;

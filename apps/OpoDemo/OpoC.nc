@@ -5,10 +5,11 @@ configuration OpoC {}
 
 implementation {
 
-  components MainC, OpoP, LedsC, RandomMtC;
+  components MainC, OpoP, LedsC, RandomMtC, Ds2411C;
   OpoP.Boot -> MainC.Boot;
   OpoP.Leds -> LedsC;
   OpoP.Random -> RandomMtC;
+  OpoP.IdReader -> Ds2411C;
 
   components new BlockStorageC(VOLUME_BLOCKSTORE); 
   OpoP.BlockRead -> BlockStorageC.BlockRead;
