@@ -26,8 +26,9 @@ implementation {
   event message_t* DataReceive.receive(message_t *msg, void *payload, uint8_t len) {
     opo_bmsg_t *data = (opo_bmsg_t *) payload;
     int i;
-    printf("Range:%lu\n", data->rec.range);
-    printf("Seq:%lu\n", data->rec.sequence);
+    uint32_t total_time = 0;
+    printf("RANGE:%u\n", data->rec.range);
+    printf("SEQ:%u\n", data->rec.sequence);
     printf("RX_ID:0x");
     for(i = 0; i < 6; i++) {
       printf("%x", data->m_id[i]);
@@ -39,9 +40,11 @@ implementation {
     }
     printf("\n");
     printf("RSSI:%i\n", data->rec.rssi);
-    printf("Sec:%u\n", data->rec.seconds);
-    printf("Min:%u\n", data->rec.minutes);
-    printf("Hour:%u\n", data->rec.hours);
+    printf("TX_PWR:%u\n", data->rec.tx_pwr);
+    total_time += data->rec.seconds;
+    total_time += data->rec.minutes * 60;
+    total_time += data->rec.hours * 60 * 60;
+    printf("TIME:%u\n", total_time);
     printfflush();
     return msg;
   }

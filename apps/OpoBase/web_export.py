@@ -14,14 +14,14 @@ while True:
             packet[s[0]] = int(s[1].strip())
         if "RANGE" in line:
             r = float(s[1].strip()) / 1000000.0
-            packet[s[0]] = r
+            packet['RANGE'] = r
         if "TIME" in line:
             print "Woo"
             if len(packet) == 8:
                 print packet
                 data = json.dumps(packet)
                 d_len = len(data)
-                url = 'http://fusion.eecs.umich/raw_update'
+                url = 'http://fusion.eecs.umich.edu/raw_update'
                 req = urllib2.Request(url, data, {'Content-Type': 'application/json',
                                                   'Content-Length': d_len})
                 r = urllib2.urlopen(req)
