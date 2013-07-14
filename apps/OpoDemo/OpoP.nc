@@ -89,6 +89,7 @@ module OpoP @safe() {
     interface Leds;
     interface Boot;
     interface Random;
+    interface ParameterInit<uint32_t> as RandInit;
   }
 }
 
@@ -165,11 +166,19 @@ implementation {
    * randomized later time between 2 and 4 seconds from boot.
   */
   event void Boot.booted() {
+    uint32_t seed = 0;
+    int i;
     TACTL_RESTORE = TACTL;
     call IdReader.read(&m_id[0]);
+    for(i = 0; i < 4; i++) {
+      seed <<= 8;
+      seed |= (uint32_t) m_id[i];
+    }
+    call RandInit.init(seed);
     call CC2420Packet.setPower(&packet, 31);
     call HplRV4162.writeSTBit();
     printf("BOOTED\n");
+    printf("Seed:%lu\n", seed);
     printfflush();
   }
 
@@ -197,6 +206,7 @@ implementation {
     call RxGuardTimer.stop();
     enableTransmit();
     opo_buffer_count++;
+    call Leds.led0On();
     
     if(opo_buffer_index >= 80 || opo_buffer_count >= 40) {
       post WriteInfoToDisk();
@@ -232,6 +242,7 @@ implementation {
   */
   event void RangeStopTimer.fired() {
     stopTransducer();
+    call Leds.led0Off();
     call SFDLatch.clr();
     setRandGuard();
     call WakeStartTimer.startOneShot(wakestartmin + randguard);

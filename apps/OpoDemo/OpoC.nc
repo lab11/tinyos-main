@@ -9,6 +9,7 @@ implementation {
   OpoP.Boot -> MainC.Boot;
   OpoP.Leds -> LedsC;
   OpoP.Random -> RandomMtC;
+  OpoP.RandInit -> RandomMtC;
   OpoP.IdReader -> Ds2411C;
 
   components new BlockStorageC(VOLUME_BLOCKSTORE); 
