@@ -16,7 +16,7 @@ SEED MUST BE GREATER THAN_MT 0
 
 module RandomMtC {
   provides interface Init;
-  provides interface ParameterInit<uint16_t> as SeedInit;
+  provides interface ParameterInit<uint32_t> as SeedInit;
   provides interface Random;
 }
 implementation {
@@ -25,14 +25,14 @@ implementation {
   void gen_init_states();
 
   command error_t Init.init() {
-    atomic mt[0] = (uint32_t)(TOS_NODE_ID);
+    atomic mt[0] = (uint32_t)(TOS_NODE_ID + 1);
     gen_init_states();
     return SUCCESS;
   }
 
-/* Initialize with 16-bit seed */ 
-  command error_t SeedInit.init(uint16_t s) {
-    atomic  mt[0] = (uint32_t)(s);
+/* Initialize with 32-bit seed */ 
+  command error_t SeedInit.init(uint32_t s) {
+    atomic  mt[0] = s;
     gen_init_states(); 
     return SUCCESS;
   }
