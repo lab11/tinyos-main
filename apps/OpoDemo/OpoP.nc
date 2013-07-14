@@ -35,11 +35,11 @@
   Node B Broadcasting, and Node A rebroadcasting. This helps with situations 
   where two people are walking towards each other. 
 
-  TODO (Optional): 
+  TODO (Optional):
   - Add backoff time to compensate for seeing many other nodes
 
   @author William Huang <wwhuang@umich.edu>
-*/ 
+*/
 
 module OpoP @safe() {
   uses {
@@ -108,19 +108,19 @@ implementation {
   bool rfValid = FALSE; // Validtes that the SFD went high due a valid packet 
 
   // Backoff timers in ms
-  uint32_t randguard = 0; // general randomized backoff timer 
+  uint32_t randguard = 0; // general randomized backoff timer
   uint16_t wakestartmin = 1000; // normal wake start minimum
 
   // Rf variables.
-  message_t packet; // rf packet struct. see Opo.h  
+  message_t packet; // rf packet struct. see Opo.h
   bool rfSendLock = FALSE;  // Set to TRUE when we are sending a packet.
-  uint32_t range_sequence = 0; // Broadcast ranging number. 
+  uint32_t range_sequence = 0; // Broadcast ranging number.
 
   // Flash storage variables
   opo_rec_t opo_read_store;  // used to store data as we read it and export it
   opo_rec_t opo_store_buffer[93]; // buffers data. disk buffer is 256 bytes
   uint32_t flash_w_addr = 0; // Current address to store to.
-  uint32_t flash_r_addr = 0; // Current address to read from.  
+  uint32_t flash_r_addr = 0; // Current address to read from.
   uint8_t flash_valid = 77; //Determines if read data is junk or not
   uint16_t opo_buffer_index = 0; // tells us which buffer address to write to
   uint16_t opo_buffer_count = 0; // after x transmits, flush buffer to disk
@@ -242,7 +242,7 @@ implementation {
 
   /*
    * This event is responsible for starting up the radio upon a wake up pulse
-   * And doing the ranging calculations upon a ranging pulse. 
+   * And doing the ranging calculations upon a ranging pulse.
    * Guard timers are NOT set up here since this an async event.
   */
   async event void UltrasonicCapture.captured(uint16_t time) {
@@ -466,19 +466,24 @@ implementation {
     
     if(opo_read_store.valid == flash_valid) {
       int i = 0;
-      printf("m_id:");
-      for(i = 0; i < 8; i++) {
-        printf("%u", m_id[i]);
+      printf("m_id:0x");
+      printf("0x");
+      for(i = 0; i < 6; i++) {
+        printf("%x", m_id[i]);
       }
       printf("\n");
-      printf("o_id:%u\n", opo_read_store.o_id);
+      printf("o_id:0x");
+      for(i = 0; i < 6; i++) {
+        printf("%x", opo_read_store.o_id[i]);
+      }
+      printf("\n");
       printf("r:%lu\n", opo_read_store.range);
       printf("sq:%lu\n", opo_read_store.sequence);
       printf("s:%u\n", opo_read_store.seconds);
       printf("m:%u\n", opo_read_store.minutes);
       printf("h:%u\n", opo_read_store.hours);
       printf("rs:%i\n", opo_read_store.rssi);
-      printf("tx: %u\n", opo_read_store.tx_pwr);
+      printf("tx:%u\n", opo_read_store.tx_pwr);
       printfflush();
       call ReadTimer.startOneShot(70);
     }
