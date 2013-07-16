@@ -44,7 +44,6 @@ implementation {
   OpoP.TxRxSel -> GpIO.TXRXSEL;
   OpoP.TxGate -> GpIO.TXGATE;
   OpoP.Amp3_ADC -> GpIO.AMP3_ADC;
-  OpoP.leds2gpio -> GpIO.leds2gpio;
 
   components Msp430TimerC;
   OpoP.SFDCapture -> Msp430TimerC.SFDCAPTURE;

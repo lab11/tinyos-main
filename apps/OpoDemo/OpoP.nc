@@ -66,7 +66,6 @@ module OpoP @safe() {
     interface HplMsp430GeneralIO as TxRxSel;
     interface HplMsp430GeneralIO as TxGate;
     interface HplMsp430GeneralIO as Amp3_ADC;
-    interface HplMsp430GeneralIO as leds2gpio;
     /*RF Stuff */
     interface AMSend;
     interface AMSend as BaseSend;
@@ -145,8 +144,8 @@ implementation {
   // flush our buffer to disk
   task void WriteInfoToDisk() {
     TACTL = TACTL_RESTORE;
-    printf("TX: %u\n", opo_buffer_count);
-    printf("RX: %u\n", opo_buffer_index);
+    //printf("TX: %u\n", opo_buffer_count);
+    //printf("RX: %u\n", opo_buffer_index);
     printfflush();
     call At45dbPowerDownTimer.stop();
     call At45dbPower.start();
@@ -171,7 +170,7 @@ implementation {
     int i;
     TACTL_RESTORE = TACTL;
     call IdReader.read(&m_id[0]);
-    for(i = 0; i < 4; i++) {
+    for(i = 3; i >= 0; i--) {
       seed <<= 8;
       seed |= (uint32_t) m_id[i];
     }
@@ -180,6 +179,11 @@ implementation {
     call HplRV4162.writeSTBit();
     printf("BOOTED\n");
     printf("Seed:%lu\n", seed);
+    printf("DSID:0x");
+    for(i = 0; i < 6; i++) {
+      printf("%x", m_id[i]);
+    }
+    printf("\n");
     printfflush();
   }
 
@@ -207,7 +211,7 @@ implementation {
     call RxGuardTimer.stop();
     enableTransmit();
     opo_buffer_count++;
-    call Leds.led0On();
+    //call Leds.led0On();
     
     if(opo_buffer_index >= 80 || opo_buffer_count >= 40) {
       post WriteInfoToDisk();
@@ -243,7 +247,7 @@ implementation {
   */
   event void RangeStopTimer.fired() {
     stopTransducer();
-    call Leds.led0Off();
+    //call Leds.led0Off();
     call SFDLatch.clr();
     setRandGuard();
     call WakeStartTimer.startOneShot(wakestartmin + randguard);
@@ -261,7 +265,7 @@ implementation {
     // One interrupt per ultrasonic pulse. 
     call UltrasonicCapture.setEdge(MSP430TIMER_CM_NONE);
     call UCapControl.clearPendingInterrupt();
-    call Leds.led1On();
+    //call Leds.led1On();
     
     // Wake up pulse
     if(m_state == RX_WAKE) { 
@@ -314,7 +318,7 @@ implementation {
   }
 
   event void RxResetTimer.fired() {
-    call Leds.led1Off();
+    //call Leds.led1Off();
     enableReceive();
   }
 
@@ -591,8 +595,6 @@ implementation {
     call TxGate.makeOutput();
     call TxGate.set();
     call TxRxSel.makeOutput();
-
-    call leds2gpio.makeOutput();
 
     // Sets up SFD Time Capture, although not enabled on any edge
     call SFDCapGpIO.selectModuleFunc();
