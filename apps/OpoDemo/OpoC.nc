@@ -32,8 +32,9 @@ implementation {
   OpoP.RfControl -> ActiveMessageC.SplitControl;
   OpoP.AMPacket -> ActiveMessageC.AMPacket;
 
-  components CC2420PacketC;
+  components CC2420PacketC, CC2420ControlC;
   OpoP.CC2420Packet -> CC2420PacketC.CC2420Packet;
+  OpoP.CC2420Config -> CC2420ControlC.CC2420Config;
 
   components HplMsp430GeneralIOC as GpIO;
   OpoP.SFDLatchIntGpIO -> GpIO.SFDPIN; // alt interrupt handler for SFD Line

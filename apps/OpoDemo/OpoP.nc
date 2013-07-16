@@ -74,6 +74,7 @@ module OpoP @safe() {
     interface AMPacket;
     interface SplitControl as RfControl;
     interface CC2420Packet;
+    interface CC2420Config;
     /* Timer Controls */
     interface Msp430Capture as SFDCapture;
     interface Msp430Capture as UltrasonicCapture; 
@@ -260,6 +261,7 @@ implementation {
     // One interrupt per ultrasonic pulse. 
     call UltrasonicCapture.setEdge(MSP430TIMER_CM_NONE);
     call UCapControl.clearPendingInterrupt();
+    call Leds.led1On();
     
     // Wake up pulse
     if(m_state == RX_WAKE) { 
@@ -312,6 +314,7 @@ implementation {
   }
 
   event void RxResetTimer.fired() {
+    call Leds.led1Off();
     enableReceive();
   }
 
@@ -363,7 +366,7 @@ implementation {
       for(i = 0; i < 6; i++) {
         p -> m_id[i] = m_id[i];
       }
-
+      call CC2420Config.setChannel(BASE_CHANNEL);
       call BaseSend.send(AM_BROADCAST_ADDR, 
                        &packet, 
                        sizeof(opo_bmsg_t));
@@ -387,6 +390,7 @@ implementation {
 
   event void BaseSend.sendDone(message_t* bufPtr, error_t error) {
     m_state = RX_WAKE;
+    call CC2420Config.setChannel(OPO_CHANNEL);
     call RfControl.stop();
   }
 
@@ -420,6 +424,8 @@ implementation {
     return msg;
     
   }
+
+   event void CC2420Config.syncDone(error_t error) {}
 
 /******************** Block Storage Stuff *************************************/
    

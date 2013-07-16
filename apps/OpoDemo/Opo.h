@@ -2,6 +2,8 @@
 #define OPO_H
 
 #define CC2420_DEF_CHANNEL 15
+#define OPO_CHANNEL 15
+#define BASE_CHANNEL 16
 #define OPO_DEBUG
 
 /* SFD stuff */
