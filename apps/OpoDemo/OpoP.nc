@@ -336,10 +336,14 @@ implementation {
   event void RfControl.startDone(error_t err) {
     if(m_state == TX) {
       opo_rf_msg_t *payload;
+      int i;
       payload = (opo_rf_msg_t*) call AMSend.getPayload(&packet, 
                                                        sizeof(opo_rf_msg_t));
       payload -> sequence = range_sequence;
       payload -> tx_pwr = call CC2420Packet.getPower(&packet);
+      for(i = 0; i < 6; i++) {
+        payload -> m_id[i] = m_id[i];
+      }
 
       call SFDCapture.setEdge(MSP430TIMER_CM_RISING);
       call AMSend.send(AM_BROADCAST_ADDR, 
