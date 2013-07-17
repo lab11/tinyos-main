@@ -370,7 +370,6 @@ implementation {
       for(i = 0; i < 6; i++) {
         p -> m_id[i] = m_id[i];
       }
-      call CC2420Config.setChannel(BASE_CHANNEL);
       call BaseSend.send(AM_BROADCAST_ADDR, 
                        &packet, 
                        sizeof(opo_bmsg_t));
@@ -399,6 +398,7 @@ implementation {
   }
 
   event void BaseSendTimer.fired() {
+    call CC2420Config.setChannel(BASE_CHANNEL);
     call RfControl.start();
   }
 
@@ -411,7 +411,7 @@ implementation {
       opo_rf_msg_t *mData = (opo_rf_msg_t *) payload;
       opo_store_buffer[opo_buffer_index].valid = flash_valid;
       opo_store_buffer[opo_buffer_index].sequence = mData -> sequence;
-      for(i = 0; i < 8; i++) {
+      for(i = 0; i < 6; i++) {
         opo_store_buffer[opo_buffer_index].o_id[i] = mData -> m_id[i];
       } 
       opo_store_buffer[opo_buffer_index].rssi = call CC2420Packet.getRssi(msg);
@@ -488,7 +488,6 @@ implementation {
     if(opo_read_store.valid == flash_valid) {
       int i = 0;
       printf("m_id:0x");
-      printf("0x");
       for(i = 0; i < 6; i++) {
         printf("%x", m_id[i]);
       }
