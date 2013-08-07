@@ -1,9 +1,9 @@
-/* 
-Random number generator based on the Mersenne Twister PRNG. This algorithm is 
-slower than the Park Miller PRN_MTG used in RandomMlgC, but has better randomness 
+/*
+Random number generator based on the Mersenne Twister PRNG. This algorithm is
+slower than the Park Miller PRN_MTG used in RandomMlgC, but has better randomness
 properties.
 
-Taken from the latest official c version of the MT PRNG. 
+Taken from the latest official c version of the MT PRNG.
 
 SEED MUST BE GREATER THAN_MT 0
 */
@@ -15,25 +15,38 @@ SEED MUST BE GREATER THAN_MT 0
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
 module RandomMtC {
-  provides interface Init;
-  provides interface ParameterInit<uint32_t> as SeedInit;
-  provides interface Random;
+  provides {
+    interface Init;
+    interface ParameterInit<uint32_t> as SeedInit;
+    interface Random;
+  }
+  uses {
+    interface ReadId48 as IdReader;
+  }
 }
 implementation {
+  uint8_t m_id[6];
   static uint32_t mt[N_MT]; /* the array for the state vector  */
   static uint32_t mti = N_MT + 1; /* mti==N_MT+1 means mt[N_MT] is not initialized */;
   void gen_init_states();
 
   command error_t Init.init() {
-    atomic mt[0] = (uint32_t)(TOS_NODE_ID + 1);
+    int i;
+    call IdReader.read(&m_id[0]);
+
+    for(i = 3; i >= 0; i--) {
+      mt[0] <<= 8;
+      mt[0] |= (uint32_t) m_id[i];
+    }
+
     gen_init_states();
     return SUCCESS;
   }
 
-/* Initialize with 32-bit seed */ 
+/* Initialize with 32-bit seed */
   command error_t SeedInit.init(uint32_t s) {
     atomic  mt[0] = s;
-    gen_init_states(); 
+    gen_init_states();
     return SUCCESS;
   }
 
@@ -63,7 +76,7 @@ implementation {
 
         mti = 0;
     }
-  
+
     y = mt[mti++];
 
     /* Tempering */
