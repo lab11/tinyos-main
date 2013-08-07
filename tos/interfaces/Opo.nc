@@ -4,13 +4,14 @@ Author: William Huang
 */
 
 interface Opo {
-	command error_t transmit(message_t packet, size_t psize);
-	/*
-	Transmits an opo synchronization
-	*/
+	command error_t transmit(message_t* packet, size_t psize);
+	event void transmit_done();
 
-	async void receive(uint32_t range, message_t msg);
-	/*
-	Triggers upon a successful opo synchronization/ranging
-	*/
+	command error_t enable_receive();
+	command error_t disable_receive();
+
+	event void receive(uint32_t range, message_t* msg);
+	event void receive_failed();
+
+    command error_t setup_pins();
 }
