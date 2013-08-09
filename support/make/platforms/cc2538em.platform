@@ -1,0 +1,21 @@
+#-*-Makefile-*- vim:syntax=make
+
+PFLAGS += -I%T/platforms/cc2538em
+PFLAGS += -I%T/chips/cc2538
+PFLAGS += -I%T/chips/cc2538/gpio
+PFLAGS += -I%T/chips/cc2538/timer
+PFLAGS += -I%T/chips/cc2538/timer/interfaces
+PFLAGS += -I%T/lib/timer
+PFLAGS += -I%T/lib/serial
+PFLAGS += -I%T/lib/power
+PFLAGS += -I%T/lib/rfxlink/layers
+PFLAGS += -I%T/lib/rfxlink/util
+
+
+PFLAGS += -nostartfiles
+PFLAGS += -fnesc-target=env
+PFLAGS += -fnesc-no-debug
+PFLAGS += -Wnesc-implicit-conn
+
+
+export NESC_MACHINE = structure_size_boundary=32, pointer=4,4 float=4,4 double=8,4 long_double=8,4 short=2,2 int=4,4 long=4,4 long_long=8,4 int1248_align=1,2,4,4 wchar_size_size=4,4 char_wchar_signed=false,true

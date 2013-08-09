@@ -1,2 +1,4 @@
+#-*-Makefile-*- vim:syntax=make
 
-BUILD_DEPS = exe program
+BUILD_DEPS = program
+NODEID ?= $(INSTALL)

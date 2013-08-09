@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configurations XML_version="1.2" id="configurations_0">
-    
+
 
 
 
@@ -23,7 +23,7 @@
                 </choice>
             </property>
             <platform XML_version="1.2" id="platform_0">
-                <instance XML_version="1.2" desc="CC2538_0" href="devices/cc2538.xml" id="CC2538_0" xml="cc2538.xml" xmlpath="devices"/>
+                <instance XML_version="1.2" desc="CC2538_0" href="devices/cc2538sf53.xml" id="CC2538_0" xml="cc2538sf53.xml" xmlpath="devices"/>
             <device HW_revision="1" XML_version="1.2" description="CORTEXM3" id="CC2538_0" partnum="CC2538" simulation="no">
                     <router HW_revision="1.0" XML_version="1.2" description="ICEPick_C Router" id="IcePick_C_0" isa="ICEPICK_C">
                         <subpath id="subpath_0">
