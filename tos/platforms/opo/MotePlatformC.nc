@@ -13,24 +13,24 @@ implementation {
         P1IE = 0;
 
 		P2SEL = 0;
-        P2DIR = 0x4b;
+        P2DIR = 0xbe;
         P2OUT = 0x30;
         P2IE = 0;
 
 		P3SEL = 0;
-		P3DIR = 0xff;
-		P3OUT = 0x0e;
+		P3DIR = 0xfb;
+		P3OUT = 0x00;
 
 		P4SEL = 0;
-		P4DIR = 0xff;
-		P4OUT = 0xdd;
+		P4DIR = 0xf5;
+		P4OUT = 0x00;
 
 		P5SEL = 0;
 		P5DIR = 0xff;
-		P5OUT = 0x0e;
+		P5OUT = 0x08;
 
 		P6SEL = 0;
-		P6DIR = 0xff;
+		P6DIR = 0xf0;
 		P6OUT = 0x00;
 
 	// the commands above take care of the pin directions
@@ -38,7 +38,7 @@ implementation {
 	// directions using the TOSH_SET/CLR macros
 
     }//atomic
-    
+
     return call SubInit.init();
   }
 
