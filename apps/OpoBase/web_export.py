@@ -16,7 +16,6 @@ while True:
             r = float(s[1].strip()) / 1000000.0
             packet['RANGE'] = r
         if "TIME" in line:
-            print "Woo"
             if len(packet) == 8:
                 print packet
                 data = json.dumps(packet)
@@ -24,7 +23,15 @@ while True:
                 url = 'http://fusion.eecs.umich.edu/raw_update'
                 req = urllib2.Request(url, data, {'Content-Type': 'application/json',
                                                   'Content-Length': d_len})
-                r = urllib2.urlopen(req)
+                try:
+                    r = urllib2.urlopen(req)
+                except urllib2.HTTPError, e:
+                    print "HTTP ERROR"
+                    print "Code: " + str(e.code)
+                    print "Msg: " + str(e.msg)
+                    print "Hdrs: " + str(e.hdrs)
+                    print "fp: " + str(e.fp)
+                print "Correct Packet"
                 print str(r.read())
             else:
                 print "Misformed Packet"
