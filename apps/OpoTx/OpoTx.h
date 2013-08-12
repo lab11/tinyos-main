@@ -1,0 +1,17 @@
+#ifndef OPO_TX_H
+#define OPO_TX_H
+
+#define AMP3_ADC      Port60
+#define SFDPIN        Port26
+
+typedef nx_struct opo_range_msg {
+    nx_uint32_t sequence;
+    nx_uint8_t  m_id[6];
+} opo_rf_msg_t;
+
+enum {
+    OPO = 17,
+    PREP = 5
+};
+
+#endif
