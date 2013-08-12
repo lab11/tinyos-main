@@ -139,11 +139,14 @@ implementation {
     call UCapControl.clearPendingInterrupt();
 
     if(opo_rx_state == RX_WAKE) {
+      call Leds.led0Toggle();
       call RxTimer.startOneShot(25);
     }
     else {
         if (time > sfd_time && sfd_time != 0) {
           range = (time - sfd_time) * 10634; // range in microm
+          printf("OR: %lu\n", range);
+          printfflush();
         }
     }
 
@@ -154,11 +157,10 @@ implementation {
 
   async event void SFDCapture.captured(uint16_t time) {
     if(opo_rx_state == RX_RANGE && sfd_time == 0) {
-      call RxTimer.stop();
       sfd_time = time;
       call UltrasonicCapture.setEdge(MSP430TIMER_CM_RISING);
       opo_rx_state = RX_RF_DONE;
-      call RxTimer.startOneShot(20);
+      call Leds.led1Toggle();
     }
     else if(opo_state == TX) {
       call SFDLatch.set();
@@ -176,6 +178,8 @@ implementation {
       rx_msg = msg;
       opo_rx_state = RX_RF_DONE;
       call RfControl.stop();
+      printf("RD\n");
+      printfflush();
     }
 
     return msg;
@@ -189,19 +193,7 @@ implementation {
     else if(opo_rx_state == RX_WAKE) {
       call RfControl.start();
     }
-    else if(opo_rx_state == RX_RANGE || opo_rx_state == RX_SFD_DONE) {
-      disableRx();
-      call RfControl.stop();
-      signal Opo.receive_failed();
-    }
     else if(opo_rx_state == RX_RF_DONE) {
-      disableRx();
-      if(range > 0 && rx_msg != NULL) {
-        signal Opo.receive(range, rx_msg);
-      }
-      else {
-        signal Opo.receive_failed();
-      }
     }
   }
 
@@ -218,17 +210,24 @@ implementation {
     }
     else if(opo_state == RX) {
       opo_rx_state = RX_RANGE;
-      call RxTimer.startOneShot(30);
+      call RxTimer.startOneShot(25);
     }
   }
 
   event void RfControl.stopDone(error_t err) {
     if(opo_state == RX) {
       if(opo_rx_state == RX_RF_DONE) {
-        call RxTimer.startOneShot(12);
+        disableRx();
+        signal Opo.receive_failed();
       }
       else if(opo_rx_state == RX_RF_DONE) {
-        call RxTimer.startOneShot(15);
+        disableRx();
+        if(range > 0 && rx_msg != NULL) {
+          signal Opo.receive(range, rx_msg);
+        }
+        else {
+          signal Opo.receive_failed();
+        }
       }
       else if(opo_rx_state == RX_SFD_DONE) {
         disableRx();
