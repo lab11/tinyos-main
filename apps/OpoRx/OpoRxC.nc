@@ -19,8 +19,7 @@ implementation {
     components new AMSenderC(OPO) as OpoRfSend;
     components new AMReceiverC(OPO) as OpoRfReceive;
 
-    //OpoRxP.RfControl -> ActiveMessageC.SplitControl;
-    OpoRxP.Packet -> Packet;
+    OpoRxP.Packet -> ActiveMessageC.Packet;
     OpoC.AMSend -> OpoRfSend;
     OpoC.AMReceive -> OpoRfReceive;
     OpoC.RfControl -> ActiveMessageC.SplitControl;
@@ -30,4 +29,7 @@ implementation {
 
     components At45dbPowerC;
     OpoRxP.At45dbPower -> At45dbPowerC;
+
+    components new TimerMilliC() as RxTimer;
+    OpoRxP.RxTimer -> RxTimer;
 }

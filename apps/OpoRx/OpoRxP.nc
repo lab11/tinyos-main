@@ -11,6 +11,7 @@ module OpoRxP {
         interface CC2420Config;
         interface Packet;
         interface Opo;
+        interface Timer<TMilli> as RxTimer;
     }
 }
 
@@ -23,12 +24,6 @@ implementation {
     event void Boot.booted() {
         opo_rf_msg_t *p;
         call IdReader.read(&m_id[0]);
-        p = (opo_rf_msg_t*) call Packet.getPayload(&packet,
-                                                   sizeof());
-
-        for(i = 0; i < 6; i++) {
-            p -> m_id[i] = m_id[i];
-        }
 
         call At45dbPower.stop();
         call Opo.setup_pins();
@@ -38,12 +33,18 @@ implementation {
     event void Opo.receive(uint32_t range, message_t* msg) {
         printf("R: %lu\n", range);
         printfflush();
+        call RxTimer.startOneShot(50);
     }
 
     event void Opo.receive_failed() {
         fcount += 1;
         printf("FC: %u\n", fcount);
         printfflush();
+        call RxTimer.startOneShot(50);
+    }
+
+    event void RxTimer.fired() {
+        call Opo.enable_receive();
     }
 
     event void Opo.transmit_done() {}
