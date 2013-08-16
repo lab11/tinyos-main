@@ -36,8 +36,8 @@ module OpoP {
 
 implementation {
 
-  enum {RX, TX} opo_state;
-  enum {RX_SETUP, RX_WAKE, RX_RF_START, RX_RANGE, RX_SFD_DONE, RX_RF_DONE, RX_IDLE} opo_rx_state;
+  enum {RX, TX, IDLE} opo_state;
+  enum {RX_SETUP, RX_WAKE, RX_RANGE, RX_IDLE} opo_rx_state;
   enum {TX_WAKE, TX_WAKE_STOP, TX_RANGE, TX_RANGE_STOP, TX_IDLE} opo_tx_state;
 
   message_t *tx_packet;
@@ -47,10 +47,6 @@ implementation {
   // Timing and ranging
   uint32_t sfd_time = 0; // SFD trigger time.
   uint32_t range = 0; // Based on ToF difference between rf and ultrasonic
-  bool rfValid = FALSE; // Validtes that the SFD went high due a valid packet
-
-  // Rf variables.
-  uint32_t range_sequence = 0; // Broadcast ranging number.
 
   /* Helper function prototypes */
   void startTransducer(); // starts PWM to drive Ultrasonic Transducers
@@ -115,9 +111,6 @@ implementation {
   }
 
   event void AMSend.sendDone(message_t* bufPtr, error_t error) {
-    printf("5\n");
-    printfflush();
-    range_sequence++;
     call TxTimer.startOneShot(3);
     call RfControl.stop();
   }
@@ -156,11 +149,10 @@ implementation {
   }
 
   async event void SFDCapture.captured(uint16_t time) {
+    call Leds.led1Toggle();
     if(opo_rx_state == RX_RANGE && sfd_time == 0) {
       sfd_time = time;
       call UltrasonicCapture.setEdge(MSP430TIMER_CM_RISING);
-      opo_rx_state = RX_RF_DONE;
-      call Leds.led1Toggle();
     }
     else if(opo_state == TX) {
       call SFDLatch.set();
@@ -176,7 +168,6 @@ implementation {
   event message_t* Receive.receive(message_t *msg, void *payload, uint8_t len) {
     if(opo_state == RX) {
       rx_msg = msg;
-      opo_rx_state = RX_RF_DONE;
       call RfControl.stop();
       printf("RD\n");
       printfflush();
@@ -193,7 +184,8 @@ implementation {
     else if(opo_rx_state == RX_WAKE) {
       call RfControl.start();
     }
-    else if(opo_rx_state == RX_RF_DONE) {
+    else if(opo_rx_state == RX_RANGE) {
+      call RfControl.stop();
     }
   }
 
@@ -210,27 +202,17 @@ implementation {
     }
     else if(opo_state == RX) {
       opo_rx_state = RX_RANGE;
-      call RxTimer.startOneShot(25);
+      call RxTimer.startOneShot(50);
     }
   }
 
   event void RfControl.stopDone(error_t err) {
     if(opo_state == RX) {
-      if(opo_rx_state == RX_RF_DONE) {
-        disableRx();
-        signal Opo.receive_failed();
+      disableRx();
+      if(range > 0 && rx_msg != NULL) {
+        signal Opo.receive(range, rx_msg);
       }
-      else if(opo_rx_state == RX_RF_DONE) {
-        disableRx();
-        if(range > 0 && rx_msg != NULL) {
-          signal Opo.receive(range, rx_msg);
-        }
-        else {
-          signal Opo.receive_failed();
-        }
-      }
-      else if(opo_rx_state == RX_SFD_DONE) {
-        disableRx();
+      else {
         signal Opo.receive_failed();
       }
     }
@@ -335,7 +317,6 @@ implementation {
       call SFDCapture.setEdge(MSP430TIMER_CM_NONE);
 
       sfd_time = 0;
-      rfValid = FALSE;
       rx_msg = NULL;
       range = 0;
       opo_state = RX;
@@ -349,6 +330,7 @@ implementation {
     call UltrasonicCapture.setEdge(MSP430TIMER_CM_NONE);
     call SFDCapture.setEdge(MSP430TIMER_CM_NONE);
     opo_rx_state = RX_IDLE;
+    opo_state = IDLE;
   }
 
 }
