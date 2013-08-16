@@ -26,6 +26,7 @@ implementation {
     event void Boot.booted() {
         int i;
         opo_rf_msg_t *p;
+        call IdReader.read(&m_id[0]);
         //call SFDIntGpio.makeInput();
         p = (opo_rf_msg_t*) call PrepSend.getPayload(&packet,
                                                      sizeof(opo_rf_msg_t));
@@ -35,7 +36,7 @@ implementation {
 
         call At45dbPower.stop();
         call AMP3_ADC.makeInput();
-        call IdReader.read(&m_id[0]);
+
         call Opo.setup_pins();
         call TxTimer.startOneShot(2000);
     }
@@ -46,13 +47,14 @@ implementation {
         p = (opo_rf_msg_t*) call PrepSend.getPayload(&packet,
                                                      sizeof(opo_rf_msg_t));
         p -> sequence = range_sequence;
+        range_sequence++;
 
-        call Leds.led0On();
+        //call Leds.led0On();
         call Opo.transmit(&packet, sizeof(opo_rf_msg_t));
     }
 
     event void Opo.transmit_done() {
-        call Leds.led0Off();
+        //call Leds.led0Off();
         call TxTimer.startOneShot(3000);
     }
 
