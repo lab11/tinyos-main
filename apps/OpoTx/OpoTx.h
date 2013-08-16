@@ -1,6 +1,10 @@
 #ifndef OPO_TX_H
 #define OPO_TX_H
 
+#define CC2420_DEF_CHANNEL 15
+#define OPO_CHANNEL 15
+#define BASE_CHANNEL 16
+
 #define AMP3_ADC      Port60
 #define SFDPIN        Port26
 
