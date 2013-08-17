@@ -40,56 +40,46 @@
  *          intended use.
  */
 
-generic module Msp430AlarmC(typedef frequency_tag) @safe()
-{
+generic module Msp430AlarmC(typedef frequency_tag) @safe() {
   provides interface Init;
   provides interface Alarm<frequency_tag,uint16_t> as Alarm;
   uses interface Msp430Timer;
   uses interface Msp430TimerControl;
   uses interface Msp430Compare;
 }
-implementation
-{
-  command error_t Init.init()
-  {
+
+implementation {
+  command error_t Init.init() {
     call Msp430TimerControl.disableEvents();
     call Msp430TimerControl.setControlAsCompare();
     return SUCCESS;
   }
 
-  async command void Alarm.start( uint16_t dt )
-  {
+  async command void Alarm.start( uint16_t dt ) {
     call Alarm.startAt( call Alarm.getNow(), dt );
   }
 
-  async command void Alarm.stop()
-  {
+  async command void Alarm.stop() {
     call Msp430TimerControl.disableEvents();
   }
 
-  async event void Msp430Compare.fired()
-  {
+  async event void Msp430Compare.fired() {
     call Msp430TimerControl.disableEvents();
     signal Alarm.fired();
   }
 
-  async command bool Alarm.isRunning()
-  {
+  async command bool Alarm.isRunning() {
     return call Msp430TimerControl.areEventsEnabled();
   }
 
-  async command void Alarm.startAt( uint16_t t0, uint16_t dt )
-  {
-    atomic
-    {
+  async command void Alarm.startAt( uint16_t t0, uint16_t dt ) {
+    atomic {
       uint16_t now = call Msp430Timer.get();
       uint16_t elapsed = now - t0;
-      if( elapsed >= dt )
-      {
+      if( elapsed >= dt ) {
         call Msp430Compare.setEventFromNow(2);
       }
-      else
-      {
+      else {
         uint16_t remaining = dt - elapsed;
         if( remaining <= 2 )
           call Msp430Compare.setEventFromNow(2);
@@ -101,18 +91,14 @@ implementation
     }
   }
 
-  async command uint16_t Alarm.getNow()
-  {
+  async command uint16_t Alarm.getNow() {
     return call Msp430Timer.get();
   }
 
-  async command uint16_t Alarm.getAlarm()
-  {
+  async command uint16_t Alarm.getAlarm() {
     return call Msp430Compare.getEvent();
   }
 
-  async event void Msp430Timer.overflow()
-  {
-  }
+  async event void Msp430Timer.overflow() {}
 }
 

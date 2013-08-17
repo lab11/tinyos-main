@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2000-2003 The Regents of the University of California.  
+/* Copyright (c) 2000-2003 The Regents of the University of California.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,14 +40,13 @@
  *          intended use.
  */
 
-configuration HilTimerMilliC
-{
+configuration HilTimerMilliC {
   provides interface Init;
   provides interface Timer<TMilli> as TimerMilli[ uint8_t num ];
   provides interface LocalTime<TMilli>;
 }
-implementation
-{
+
+implementation {
   components new AlarmMilli32C();
   components new AlarmToTimerC(TMilli);
   components new VirtualizeTimerC(TMilli,uniqueCount(UQ_TIMER_MILLI));

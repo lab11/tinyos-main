@@ -53,14 +53,13 @@ generic module Msp430TimerP(
   uses interface Msp430TimerEvent as VectorTimerX0;
   uses interface Msp430TimerEvent as VectorTimerX1;
 }
-implementation
-{
+
+implementation {
   #define TxIV (*TCAST(volatile TYPE_TAIV* ONE, TxIV_addr))
   #define TxR (*TCAST(volatile TYPE_TAR* ONE, TxR_addr))
   #define TxCTL (*TCAST(volatile TYPE_TACTL* ONE, TxCTL_addr))
 
-  async command uint16_t Timer.get()
-  {
+  async command uint16_t Timer.get() {
     // CSS 10 Feb 2006: Brano Kusy notes MSP430 User's Guide, Section 12.2.1,
     // Note says reading a counter may return garbage if its clock source is
     // async.  The noted work around is to take a majority vote.
@@ -78,73 +77,57 @@ implementation
     }
   }
 
-  async command bool Timer.isOverflowPending()
-  {
+  async command bool Timer.isOverflowPending() {
     return TxCTL & TxIFG;
   }
 
-  async command void Timer.clearOverflow()
-  {
+  async command void Timer.clearOverflow() {
     CLR_FLAG(TxCTL,TxIFG);
   }
 
-  async command void Timer.setMode( int mode )
-  {
+  async command void Timer.setMode( int mode ) {
     TxCTL = (TxCTL & ~(MC1|MC0)) | ((mode<<4) & (MC1|MC0));
   }
 
-  async command int Timer.getMode()
-  {
+  async command int Timer.getMode() {
     return (TxCTL & (MC1|MC0)) >> 4;
   }
 
-  async command void Timer.clear()
-  {
+  async command void Timer.clear() {
     TxCTL |= TxCLR;
   }
 
-  async command void Timer.enableEvents()
-  {
+  async command void Timer.enableEvents() {
     TxCTL |= TxIE;
   }
 
-  async command void Timer.disableEvents()
-  {
+  async command void Timer.disableEvents() {
     TxCTL &= ~TxIE;
   }
 
-  async command void Timer.setClockSource( uint16_t clockSource )
-  {
+  async command void Timer.setClockSource( uint16_t clockSource ) {
     TxCTL = (TxCTL & ~(TxSSEL0|TxSSEL1)) | ((clockSource << 8) & (TxSSEL0|TxSSEL1));
   }
 
-  async command void Timer.setInputDivider( uint16_t inputDivider )
-  {
+  async command void Timer.setInputDivider( uint16_t inputDivider ) {
     TxCTL = (TxCTL & ~(ID0|ID1)) | ((inputDivider << 6) & (ID0|ID1));
   }
 
-  async event void VectorTimerX0.fired()
-  {
+  async event void VectorTimerX0.fired() {
     signal Event.fired[0]();
   }
 
-  async event void VectorTimerX1.fired()
-  {
+  async event void VectorTimerX1.fired() {
     uint8_t n = TxIV;
     signal Event.fired[ n >> 1 ]();
   }
 
-  async event void Overflow.fired()
-  {
+  async event void Overflow.fired() {
     signal Timer.overflow();
   }
 
-  default async event void Timer.overflow()
-  {
-  }
+  default async event void Timer.overflow() {}
 
-  default async event void Event.fired[uint8_t n]()
-  {
-  }
+  default async event void Event.fired[uint8_t n]() {}
 }
 
