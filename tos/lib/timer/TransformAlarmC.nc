@@ -1,6 +1,6 @@
 //$Id: TransformAlarmC.nc,v 1.6 2010-06-29 22:07:50 scipio Exp $
 
-/* Copyright (c) 2000-2003 The Regents of the University of California.  
+/* Copyright (c) 2000-2003 The Regents of the University of California.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@
  * @param from_precision_tag A type indicating the precision of the original
  *   Alarm.
  * @param from_size_type The type for the width of the original Alarm.
- * @param bit_shift_right Original time units will be 2 to the power 
+ * @param bit_shift_right Original time units will be 2 to the power
  *   <code>bit_shift_right</code> larger than transformed time units.
  *
  * @author Cory Sharp <cssharp@eecs.berkeley.edu>
@@ -72,41 +72,36 @@ generic module TransformAlarmC(
    */
   uses interface Alarm<from_precision_tag,from_size_type> as AlarmFrom;
 }
-implementation
-{
+
+implementation {
   to_size_type m_t0;
   to_size_type m_dt;
 
-  enum
-  {
+  enum {
     MAX_DELAY_LOG2 = 8 * sizeof(from_size_type) - 1 - bit_shift_right,
     MAX_DELAY = ((to_size_type)1) << MAX_DELAY_LOG2,
   };
 
-  async command to_size_type Alarm.getNow()
-  {
+  async command to_size_type Alarm.getNow() {
     return call Counter.get();
   }
 
-  async command to_size_type Alarm.getAlarm()
-  {
+  async command to_size_type Alarm.getAlarm() {
     atomic return m_t0 + m_dt;
     //return m_t0 + m_dt;
   }
 
-  async command bool Alarm.isRunning()
-  {
+  async command bool Alarm.isRunning() {
     return call AlarmFrom.isRunning();
   }
 
-  async command void Alarm.stop()
-  {
+  async command void Alarm.stop() {
     call AlarmFrom.stop();
   }
 
-  void set_alarm()
-  {
-    to_size_type now = call Counter.get(), expires, remaining;
+  void set_alarm() {
+    to_size_type now = call Counter.get();
+    to_size_type expires, remaining;
 
     /* m_t0 is assumed to be in the past. If it's > now, we assume
        that time has wrapped around */
@@ -117,68 +112,53 @@ implementation
     remaining = (to_size_type)(expires - now);
 
     /* if (expires <= now) remaining = 0; in wrap-around arithmetic */
-    if (m_t0 <= now)
-      {
-	if (expires >= m_t0 && // if it wraps, it's > now
-	    expires <= now)
-	  remaining = 0;
-      }
-    else
-      {
-	if (expires >= m_t0 || // didn't wrap so < now
-	    expires <= now)
-	  remaining = 0;
-      }
-    if (remaining > MAX_DELAY)
-      {
-	m_t0 = now + MAX_DELAY;
-	m_dt = remaining - MAX_DELAY;
-	remaining = MAX_DELAY;
-      }
-    else
-      {
-	m_t0 += m_dt;
-	m_dt = 0;
-      }
+    if (m_t0 <= now) {
+	    if (expires >= m_t0 && expires <= now) // if it wraps, it's > now
+        remaining = 0;
+    }
+    else {
+	    if (expires >= m_t0 || expires <= now) // didn't wrap so < now
+	      remaining = 0;
+    }
+
+    if (remaining > MAX_DELAY) {
+	    m_t0 = now + MAX_DELAY;
+	    m_dt = remaining - MAX_DELAY;
+	    remaining = MAX_DELAY;
+    }
+    else {
+	    m_t0 += m_dt;
+	    m_dt = 0;
+    }
+
     call AlarmFrom.startAt((from_size_type)now << bit_shift_right,
 			   (from_size_type)remaining << bit_shift_right);
   }
 
-  async command void Alarm.startAt(to_size_type t0, to_size_type dt)
-  {
-    atomic
-    {
+  async command void Alarm.startAt(to_size_type t0, to_size_type dt) {
+    atomic {
       m_t0 = t0;
       m_dt = dt;
       set_alarm();
     }
   }
 
-  async command void Alarm.start(to_size_type dt)
-  {
+  async command void Alarm.start(to_size_type dt) {
     call Alarm.startAt(call Alarm.getNow(), dt);
   }
 
-  async event void AlarmFrom.fired()
-  {
-    atomic
-    {
-      if(m_dt == 0)
-      {
-	signal Alarm.fired();
+  async event void AlarmFrom.fired() {
+    atomic {
+      if(m_dt == 0) {
+	      signal Alarm.fired();
       }
-      else
-      {
-	set_alarm();
+      else {
+	      set_alarm();
       }
     }
   }
 
-  async event void Counter.overflow()
-  {
-  }
+  async event void Counter.overflow() {}
 
-  default async event void Alarm.fired()
-  {
-  }
+  default async event void Alarm.fired() {}
 }

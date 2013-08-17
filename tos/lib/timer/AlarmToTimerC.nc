@@ -1,6 +1,6 @@
 //$Id: AlarmToTimerC.nc,v 1.7 2010-06-29 22:07:50 scipio Exp $
 
-/* Copyright (c) 2000-2003 The Regents of the University of California.  
+/* Copyright (c) 2000-2003 The Regents of the University of California.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 #include "Timer.h"
 
 /**
- * AlarmToTimerC converts a 32-bit Alarm to a Timer.  
+ * AlarmToTimerC converts a 32-bit Alarm to a Timer.
  *
  * <p>See TEP102 for more details.
  * @param precision_tag A type indicating the precision of the Alarm and
@@ -43,63 +43,72 @@
  * @author Cory Sharp <cssharp@eecs.berkeley.edu>
  */
 
-generic module AlarmToTimerC(typedef precision_tag) @safe()
-{
+generic module AlarmToTimerC(typedef precision_tag) @safe() {
   provides interface Timer<precision_tag>;
   uses interface Alarm<precision_tag,uint32_t>;
 }
-implementation
-{
+
+implementation {
   // there might be ways to save bytes here, but I'll do it in the obviously
   // right way for now
   uint32_t m_dt;
   bool m_oneshot;
 
-  void start(uint32_t t0, uint32_t dt, bool oneshot)
-  {
+  void start(uint32_t t0, uint32_t dt, bool oneshot) {
     m_dt = dt;
     m_oneshot = oneshot;
     call Alarm.startAt(t0, dt);
   }
 
-  command void Timer.startPeriodic(uint32_t dt)
-  { start(call Alarm.getNow(), dt, FALSE); }
+  command void Timer.startPeriodic(uint32_t dt) {
+    start(call Alarm.getNow(), dt, FALSE);
+  }
 
-  command void Timer.startOneShot(uint32_t dt)
-  { start(call Alarm.getNow(), dt, TRUE); }
+  command void Timer.startOneShot(uint32_t dt) {
+    start(call Alarm.getNow(), dt, TRUE);
+  }
 
-  command void Timer.stop()
-  { call Alarm.stop(); }
+  command void Timer.stop() {
+    call Alarm.stop();
+  }
 
-  task void fired()
-  { 
+  task void fired() {
     if(m_oneshot == FALSE)
       start(call Alarm.getAlarm(), m_dt, FALSE);
+
     signal Timer.fired();
   }
 
-  async event void Alarm.fired()
-  { post fired(); }
+  async event void Alarm.fired() {
+    post fired();
+  }
 
-  command bool Timer.isRunning()
-  { return call Alarm.isRunning(); }
+  command bool Timer.isRunning() {
+    return call Alarm.isRunning();
+  }
 
-  command bool Timer.isOneShot()
-  { return m_oneshot; }
+  command bool Timer.isOneShot() {
+    return m_oneshot;
+  }
 
-  command void Timer.startPeriodicAt(uint32_t t0, uint32_t dt)
-  { start(t0, dt, FALSE); }
+  command void Timer.startPeriodicAt(uint32_t t0, uint32_t dt) {
+    start(t0, dt, FALSE);
+  }
 
-  command void Timer.startOneShotAt(uint32_t t0, uint32_t dt)
-  { start(t0, dt, TRUE); }
+  command void Timer.startOneShotAt(uint32_t t0, uint32_t dt) {
+    start(t0, dt, TRUE);
+  }
 
-  command uint32_t Timer.getNow()
-  { return call Alarm.getNow(); }
+  command uint32_t Timer.getNow() {
+    return call Alarm.getNow();
+  }
 
-  command uint32_t Timer.gett0()
-  { return call Alarm.getAlarm() - m_dt; }
+  command uint32_t Timer.gett0() {
+    return call Alarm.getAlarm() - m_dt;
+  }
 
-  command uint32_t Timer.getdt()
-  { return m_dt; }
+  command uint32_t Timer.getdt() {
+    return m_dt;
+  }
 }
 
