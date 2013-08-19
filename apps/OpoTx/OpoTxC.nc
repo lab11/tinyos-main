@@ -26,9 +26,6 @@ implementation {
     OpoC.AMReceive -> OpoRfReceive;
     OpoC.RfControl -> ActiveMessageC.SplitControl;
 
-    components CC2420ControlC;
-    OpoTxP.CC2420Config -> CC2420ControlC.CC2420Config;
-
     components At45dbPowerC;
     OpoTxP.At45dbPower -> At45dbPowerC;
 

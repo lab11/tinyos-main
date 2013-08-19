@@ -8,7 +8,6 @@ module OpoTxP {
         interface Random;
         interface ReadId48 as IdReader;
         interface SplitControl as At45dbPower;
-        interface CC2420Config;
         interface AMSend as PrepSend;
         interface Opo;
         interface HplMsp430GeneralIO as AMP3_ADC;
@@ -39,6 +38,8 @@ implementation {
 
         call Opo.setup_pins();
         call TxTimer.startOneShot(2000);
+        printf("BOOTED\n");
+        printfflush();
     }
 
     event void TxTimer.fired() {
@@ -49,12 +50,12 @@ implementation {
         p -> sequence = range_sequence;
         range_sequence++;
 
-        //call Leds.led0On();
+        call Leds.led0On();
         call Opo.transmit(&packet, sizeof(opo_rf_msg_t));
     }
 
     event void Opo.transmit_done() {
-        //call Leds.led0Off();
+        call Leds.led0Off();
         call TxTimer.startOneShot(3000);
     }
 
@@ -62,8 +63,6 @@ implementation {
 
     event void Opo.receive(uint32_t range, message_t* msg) {}
     event void Opo.receive_failed() {}
-
-    event void CC2420Config.syncDone(error_t error) {}
 
     event void At45dbPower.startDone(error_t err) {}
     event void At45dbPower.stopDone(error_t err) {}
