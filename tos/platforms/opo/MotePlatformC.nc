@@ -13,13 +13,13 @@ implementation {
         P1IE = 0;
 
 		P2SEL = 0;
-        P2DIR = 0xba;
-        P2OUT = 0x30;
+        P2DIR = 0xbe;
+        P2OUT = 0xb0;
         P2IE = 0;
 
 		P3SEL = 0;
 		P3DIR = 0xfb;
-		P3OUT = 0x00;
+		P3OUT = 0x0a;
 
 		P4SEL = 0;
 		P4DIR = 0xf5;
