@@ -35,9 +35,11 @@ implementation {
   OpoP.SFDCapControl -> Msp430TimerC.SFD_CAPTURE_CONTROL;
   OpoP.UltrasonicCapture -> Msp430TimerC.U_CAPTURE;
   OpoP.UCapControl -> Msp430TimerC.U_CAPTURE_CONTROL;
+  OpoP.TimerB -> Msp430TimerC.TimerB;
 
   components new TimerMilliC() as TxTimer;
   components new TimerMilliC() as RxTimer;
   OpoP.TxTimer -> TxTimer;
   OpoP.RxTimer -> RxTimer;
+
 }

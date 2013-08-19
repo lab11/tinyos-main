@@ -14,6 +14,7 @@ module OpoP {
     /* Timers */
     interface Timer<TMilli> as TxTimer;
     interface Timer<TMilli> as RxTimer;
+    interface Msp430Timer as TimerB;
     /* Pin setup */
     interface HplMsp430GeneralIO as SFDLatch;
     interface HplMsp430GeneralIO as UCapGpIO;
@@ -47,6 +48,8 @@ implementation {
   // Timing and ranging
   uint32_t sfd_time = 0; // SFD trigger time.
   uint32_t range = 0; // Based on ToF difference between rf and ultrasonic
+  uint16_t WakeTime, WakeStopTime, RangeTime, RangeStopTime;
+  uint16_t RfStartTime, RfSFDTime, RfSendDoneTime, RfStopTime;
 
   /* Helper function prototypes */
   void startTransducer(); // starts PWM to drive Ultrasonic Transducers
@@ -79,41 +82,44 @@ implementation {
 
   event void TxTimer.fired() {
     if(opo_tx_state == TX_WAKE) {
+      WakeTime = call TimerB.get();
       call SFDLatch.set();
       startTransducer();
       opo_tx_state = TX_WAKE_STOP;
       call TxTimer.startOneShot(3);
-      printf("1\n");
-      printfflush();
     }
     else if(opo_tx_state == TX_WAKE_STOP) {
+      WakeStopTime = call TimerB.get();
       call SFDLatch.clr();
       stopTransducer();
       opo_tx_state = TX_RANGE;
-      printf("2\n");
-      printfflush();
       call TxTimer.startOneShot(45);
     }
     else if(opo_tx_state == TX_RANGE) {
+      RangeTime = call TimerB.get();
       opo_tx_state = TX_RANGE_STOP;
       startTransducer();
-      printf("3\n");
-      printfflush();
       call RfControl.start();
     }
     else if(opo_tx_state == TX_RANGE_STOP) {
+      RangeStopTime = call TimerB.get();
       call SFDLatch.clr();
       stopTransducer();
-      printf("4\n");
+      printf("RT: %u\n", RangeTime);
+      printf("RfST: %u\n", RfStartTime);
+      printf("RfSFDT: %u\n", RfSFDTime);
       printfflush();
       signal Opo.transmit_done();
     }
   }
 
   event void AMSend.sendDone(message_t* bufPtr, error_t error) {
+    RfSendDoneTime = call TimerB.get();
     call TxTimer.startOneShot(3);
     call RfControl.stop();
   }
+
+  async event void TimerB.overflow() {}
 
   /*============================= Opo Receive ==================================
    Handles Receieve protocol and resetting upon false positive
@@ -132,7 +138,6 @@ implementation {
     call UCapControl.clearPendingInterrupt();
 
     if(opo_rx_state == RX_WAKE) {
-      call Leds.led0Toggle();
       call RxTimer.startOneShot(25);
     }
     else {
@@ -149,7 +154,7 @@ implementation {
   }
 
   async event void SFDCapture.captured(uint16_t time) {
-    call Leds.led1Toggle();
+    RfSFDTime = time;
     if(opo_rx_state == RX_RANGE && sfd_time == 0) {
       sfd_time = time;
       call UltrasonicCapture.setEdge(MSP430TIMER_CM_RISING);
@@ -194,6 +199,7 @@ implementation {
   ============================================================================*/
 
   event void RfControl.startDone(error_t err) {
+    RfStartTime = call TimerB.get();
     call SFDCapture.setEdge(MSP430TIMER_CM_RISING);
     if(opo_state == TX) {
       call AMSend.send(AM_BROADCAST_ADDR,
@@ -207,6 +213,7 @@ implementation {
   }
 
   event void RfControl.stopDone(error_t err) {
+    RfStopTime = call TimerB.get();
     if(opo_state == RX) {
       disableRx();
       if(range > 0 && rx_msg != NULL) {
