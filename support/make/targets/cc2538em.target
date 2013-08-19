@@ -1,0 +1,40 @@
+#-*-Makefile-*- vim:syntax=make
+TARGET = cc2538em
+
+#LINKERFILE_PREFIX?=sam3s-ek-flash
+#SAM-BA?=/dev/ttyUSB10
+#START_ADDR?=0x400000
+#BOARD?=at91sam3s4-ek
+
+ifdef CC2520_CHANNEL
+PFLAGS += -DCC2520_DEF_CHANNEL=$(CC2520_CHANNEL)
+endif
+
+# Include all of the "foundation firmware" from TI
+PFLAGS += -I$(TINYOS_ROOT_DIR)/support/sdk/c/cc2538
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/adc.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/aes.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/cpu.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/flash.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/sha256.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/ccm.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/ssi.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/debug.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/i2c.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/interrupt.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/ioc.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/sys_ctrl.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/gptimer.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/gpio.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/udma.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/uart.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/watchdog.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/pka.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/systick.c
+TOSMAKE_ADDITIONAL_INPUTS += $(TINYOS_ROOT_DIR)/support/sdk/c/cc2538/sleepmode.c
+
+$(call TOSMake_include_platform,cc2538em)
+$(call TOSMake_include_make_platform,cc2538em)
+
+cc2538em: $(BUILD_DEPS)
+	@:

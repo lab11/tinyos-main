@@ -1,0 +1,5 @@
+#-*-Makefile-*- vim:syntax=make
+
+program: setid FORCE
+	@echo -e '$(INFO_STRING) Flashing cc2538 binary with uniflash.'
+	@uniflash.sh -ccxml $(TINYOS_ROOT_DIR)/support/make/cc2538em/cc2538em.ccxml -targetOp reset -program $(MAIN_ELF) -targetOp reset
