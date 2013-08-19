@@ -26,5 +26,5 @@ implementation {
   Led1Impl -> GeneralIOC.Port47;
 
   Led2 = Led2Impl;
-  Led2Impl -> GeneralIOC.Port57;
+  Led2Impl -> GeneralIOC.Port21;
 }
