@@ -18,7 +18,7 @@ implementation {
         P2IE = 0;
 
 		P3SEL = 0;
-		P3DIR = 0xfb;
+		P3DIR = 0xff;
 		P3OUT = 0x0a;
 
 		P4SEL = 0;
