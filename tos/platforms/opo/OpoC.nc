@@ -1,5 +1,4 @@
 #include "Opo.h"
-#include "printf.h"
 
 configuration OpoC {
   provides {
@@ -16,7 +15,7 @@ implementation {
 
   Opo = OpoP.Opo;
 
-  components OpoP, MainC, LedsC, PrintfC, SerialStartC;
+  components OpoP, MainC, LedsC;
   OpoP.Leds -> LedsC.Leds;
 
   OpoP.Receive = AMReceive;

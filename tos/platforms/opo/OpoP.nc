@@ -1,5 +1,4 @@
 #include "Timer.h"
-#include "printf.h"
 #include "Opo.h"
 
 /*
@@ -48,8 +47,6 @@ implementation {
   // Timing and ranging
   uint32_t sfd_time = 0; // SFD trigger time.
   uint32_t range = 0; // Based on ToF difference between rf and ultrasonic
-  uint16_t WakeTime, WakeStopTime, RangeTime, RangeStopTime;
-  uint16_t RfStartTime, RfSFDTime, RfSendDoneTime, RfStopTime;
 
   /* Helper function prototypes */
   void startTransducer(); // starts PWM to drive Ultrasonic Transducers
@@ -64,57 +61,54 @@ implementation {
   ============================================================================*/
 
   command error_t Opo.transmit(message_t* packet, size_t psize) {
-    call UltrasonicCapture.setEdge(MSP430TIMER_CM_NONE);
-    call SFDCapture.setEdge(MSP430TIMER_CM_NONE);
+    if (opo_state == IDLE) {
+      signal Opo.transmit_done();
+    }
+    else {
+      call UltrasonicCapture.setEdge(MSP430TIMER_CM_NONE);
+      call SFDCapture.setEdge(MSP430TIMER_CM_NONE);
 
-    call TxRxSel.set();
-    call TxGate.clr();
+      call TxRxSel.set();
+      call TxGate.clr();
 
-    opo_state = TX;
-    opo_tx_state = TX_WAKE;
-    setupUltrasonicPWM();
+      opo_state = TX;
+      opo_tx_state = TX_WAKE;
+      setupUltrasonicPWM();
 
-    tx_packet = packet;
-    tx_psize = psize;
+      tx_packet = packet;
+      tx_psize = psize;
 
-    call TxTimer.startOneShot(1);
+      call TxTimer.startOneShot(1);
+    }
   }
 
   event void TxTimer.fired() {
     if(opo_tx_state == TX_WAKE) {
-      WakeTime = call TimerB.get();
       call SFDLatch.set();
       startTransducer();
       opo_tx_state = TX_WAKE_STOP;
       call TxTimer.startOneShot(3);
     }
     else if(opo_tx_state == TX_WAKE_STOP) {
-      WakeStopTime = call TimerB.get();
       call SFDLatch.clr();
       stopTransducer();
       opo_tx_state = TX_RANGE;
       call TxTimer.startOneShot(45);
     }
     else if(opo_tx_state == TX_RANGE) {
-      RangeTime = call TimerB.get();
       opo_tx_state = TX_RANGE_STOP;
       startTransducer();
       call RfControl.start();
     }
     else if(opo_tx_state == TX_RANGE_STOP) {
-      RangeStopTime = call TimerB.get();
       call SFDLatch.clr();
       stopTransducer();
-      printf("RT: %u\n", RangeTime);
-      printf("RfST: %u\n", RfStartTime);
-      printf("RfSFDT: %u\n", RfSFDTime);
-      printfflush();
+      opo_state = IDLE;
       signal Opo.transmit_done();
     }
   }
 
   event void AMSend.sendDone(message_t* bufPtr, error_t error) {
-    RfSendDoneTime = call TimerB.get();
     call TxTimer.startOneShot(3);
     call RfControl.stop();
   }
@@ -143,8 +137,6 @@ implementation {
     else {
         if (time > sfd_time && sfd_time != 0) {
           range = (time - sfd_time) * 10634; // range in microm
-          printf("OR: %lu\n", range);
-          printfflush();
         }
     }
 
@@ -154,7 +146,6 @@ implementation {
   }
 
   async event void SFDCapture.captured(uint16_t time) {
-    RfSFDTime = time;
     if(opo_rx_state == RX_RANGE && sfd_time == 0) {
       sfd_time = time;
       call UltrasonicCapture.setEdge(MSP430TIMER_CM_RISING);
@@ -162,8 +153,6 @@ implementation {
     else if(opo_state == TX) {
       call SFDLatch.set();
     }
-
-    printfflush();
 
     if (call SFDCapture.isOverflowPending()) {
       call SFDCapture.clearOverflow();
@@ -174,8 +163,6 @@ implementation {
     if(opo_state == RX) {
       rx_msg = msg;
       call RfControl.stop();
-      printf("RD\n");
-      printfflush();
     }
 
     return msg;
@@ -199,7 +186,6 @@ implementation {
   ============================================================================*/
 
   event void RfControl.startDone(error_t err) {
-    RfStartTime = call TimerB.get();
     call SFDCapture.setEdge(MSP430TIMER_CM_RISING);
     if(opo_state == TX) {
       call AMSend.send(AM_BROADCAST_ADDR,
@@ -213,7 +199,6 @@ implementation {
   }
 
   event void RfControl.stopDone(error_t err) {
-    RfStopTime = call TimerB.get();
     if(opo_state == RX) {
       disableRx();
       if(range > 0 && rx_msg != NULL) {

@@ -31,13 +31,10 @@
  */
 
 /**
- * The standard TinyOS random number generator. If your system requires a
- * specific random number generator, it should wire to that component
- * directly.
+ * Random interface wired to M twist PRNG.
  *
- * @author  Barbara Hohlt
- * @author  Phil Levis
- * @date    March 1 2005
+ * @author  William Huang
+ * @date    2013
  */
 
 configuration RandomC {
