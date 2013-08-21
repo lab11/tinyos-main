@@ -7,7 +7,6 @@ Taken from the latest official c version of the MT PRNG.
 
 SEED MUST BE GREATER THAN_MT 0
 */
-#include "printf.h"
 #define N_MT 624
 #define M 397
 #define MATRIX_A 0x9908b0dfUL   /* constant vector a */
