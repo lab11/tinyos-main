@@ -10,6 +10,7 @@ PFLAGS += -I%T/platforms/epic/chips/ds2411
 PFLAGS += -I%T/platforms/telosa
 PFLAGS += -I%T/platforms/telosa/chips/cc2420
 PFLAGS += -I%T/chips/rv4162
+PFLAGS += -I%T/chips/lis3dhtr
 PFLAGS += -I%T/chips/ds2411
 PFLAGS += -I%T/chips/cc2420
 PFLAGS += -I%T/chips/cc2420/alarm
