@@ -26,6 +26,8 @@ implementation {
         call IdReader.read(&m_id[0]);
 
         call At45dbPower.stop();
+        printf("Booted\n");
+        printfflush();
         call Opo.setup_pins();
         call Opo.enable_receive();
     }
@@ -48,9 +50,15 @@ implementation {
     }
 
     event void Opo.transmit_done() {}
+    event void Opo.transmit_failed() {}
+    event void Opo.enable_receive_failed() {
+        printf("ER Failed\n");
+        printfflush();
+    }
 
     event void CC2420Config.syncDone(error_t error) {}
 
     event void At45dbPower.startDone(error_t err) {}
     event void At45dbPower.stopDone(error_t err) {}
+
 }
