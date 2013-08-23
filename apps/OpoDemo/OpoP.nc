@@ -1,39 +1,38 @@
 #include "Timer.h"
-#include "printf.h"
 #include "Opo.h"
 
-/* 
-  This applicaiton implements the Opo Ranging Protocol, a simple protocol 
-  designed to offer quick, power efficient broadcast ranging. 
- 
-  On the transmit side, we first send a 1 ms ultrasonic wake up pulse to let 
-  nearby nodes know to expect a lighting/thunder ranging sequence. 20 ms later, 
-  we simultaneously send out a 1ms ultrasonic ranging pulse and an rf packet, 
-  which the reciever can use to determine range. 
+/*
+  This applicaiton implements the Opo Ranging Protocol, a simple protocol
+  designed to offer quick, power efficient broadcast ranging.
 
-  In theory, we could accopmlish this using a wake up pulse followed by an 
-  rf packet x ms later. In practice, it is tough to ensure that an rf packet 
-  gets sent exactly x ms later. 
+  On the transmit side, we first send a 1 ms ultrasonic wake up pulse to let
+  nearby nodes know to expect a lighting/thunder ranging sequence. 20 ms later,
+  we simultaneously send out a 1ms ultrasonic ranging pulse and an rf packet,
+  which the reciever can use to determine range.
 
-  On the receive side, after receiving the wake up pulse, we disable interrupts 
-  from ultrasonic signals and wait for a radio signal. After receiving a packet, 
-  we reenable ultrasonic interrupts, and then perform ToF difference ranging 
-  based on the next received ultrasonic interrupt. There are also guard timers 
-  to compensate for ultrasonic noise waking us up. 
+  In theory, we could accopmlish this using a wake up pulse followed by an
+  rf packet x ms later. In practice, it is tough to ensure that an rf packet
+  gets sent exactly x ms later.
 
-  It is not difficult to adapt this code to perform ultrasonic on off keying 
-  communication. However, in limited testing we found that the speed of such 
-  communication was highly limited by multipath, making it too slow to be used 
-  with mobile nodes. 
+  On the receive side, after receiving the wake up pulse, we disable interrupts
+  from ultrasonic signals and wait for a radio signal. After receiving a packet,
+  we reenable ultrasonic interrupts, and then perform ToF difference ranging
+  based on the next received ultrasonic interrupt. There are also guard timers
+  to compensate for ultrasonic noise waking us up.
 
-  In addition to this core functionality, we have added in a few optimizations. 
-  
-  The first is that after we successfully receive an ultrasonic ranging 
-  sequence, we respond fairly quickly. The idea here is that broadcast is 
-  somewhat directional, so nodes that could not see the initial broadcast 
-  should see the response broadcast. This results in Node A broadcasting, 
-  Node B Broadcasting, and Node A rebroadcasting. This helps with situations 
-  where two people are walking towards each other. 
+  It is not difficult to adapt this code to perform ultrasonic on off keying
+  communication. However, in limited testing we found that the speed of such
+  communication was highly limited by multipath, making it too slow to be used
+  with mobile nodes.
+
+  In addition to this core functionality, we have added in a few optimizations.
+
+  The first is that after we successfully receive an ultrasonic ranging
+  sequence, we respond fairly quickly. The idea here is that broadcast is
+  somewhat directional, so nodes that could not see the initial broadcast
+  should see the response broadcast. This results in Node A broadcasting,
+  Node B Broadcasting, and Node A rebroadcasting. This helps with situations
+  where two people are walking towards each other.
 
   TODO (Optional):
   - Add backoff time to compensate for seeing many other nodes
@@ -76,15 +75,15 @@ module OpoP @safe() {
     interface CC2420Config;
     /* Timer Controls */
     interface Msp430Capture as SFDCapture;
-    interface Msp430Capture as UltrasonicCapture; 
+    interface Msp430Capture as UltrasonicCapture;
     interface Msp430TimerControl as SFDCapControl;
     interface Msp430TimerControl as UCapControl;
-    /* Flash Storage */ 
-    interface BlockRead; 
+    /* Flash Storage */
+    interface BlockRead;
     interface BlockWrite;
     interface SplitControl as At45dbPower;
     /* RTC */
-    interface HplRV4162; 
+    interface HplRV4162;
     /* Boot and Random Stuff */
     interface Leds;
     interface Boot;
@@ -106,7 +105,7 @@ implementation {
   uint32_t sfd_time = 0; // SFD trigger time.
   uint32_t utime = 0; // Ultrasonic trigger time.
   uint32_t range = 0; // Based on ToF difference between rf and ultrasonic
-  bool rfValid = FALSE; // Validtes that the SFD went high due a valid packet 
+  bool rfValid = FALSE; // Validtes that the SFD went high due a valid packet
 
   // Backoff timers in ms
   uint32_t randguard = 0; // general randomized backoff timer
@@ -126,7 +125,7 @@ implementation {
   uint16_t opo_buffer_index = 0; // tells us which buffer address to write to
   uint16_t opo_buffer_count = 0; // after x transmits, flush buffer to disk
   uint16_t opo_zero_count = 0; // Used when zeroing out the flash drive
-  uint32_t current_array_address = 0; //used when flushing data to disk 
+  uint32_t current_array_address = 0; //used when flushing data to disk
 
   // Timer variable
   uint16_t TACTL_RESTORE; //we keep the default TACTL value in here
@@ -144,9 +143,6 @@ implementation {
   // flush our buffer to disk
   task void WriteInfoToDisk() {
     TACTL = TACTL_RESTORE;
-    //printf("TX: %u\n", opo_buffer_count);
-    //printf("RX: %u\n", opo_buffer_index);
-    printfflush();
     call At45dbPowerDownTimer.stop();
     call At45dbPower.start();
   }
@@ -159,7 +155,7 @@ implementation {
 /********************************* Boot Up ************************************/
 
   /*
-   * On boot, we set our: 
+   * On boot, we set our:
    * - pin functionality,
    * - ultrasonic PWM timer module (TimerA1)
    * After that, we enable receive, and set a ranging sequence to start at a
@@ -177,14 +173,6 @@ implementation {
     call RandInit.init(seed);
     call CC2420Packet.setPower(&packet, 31);
     call HplRV4162.writeSTBit();
-    printf("BOOTED\n");
-    printf("Seed:%lu\n", seed);
-    printf("DSID:0x");
-    for(i = 0; i < 6; i++) {
-      printf("%x", m_id[i]);
-    }
-    printf("\n");
-    printfflush();
   }
 
   /*************************** Opo Transmit ***********************************/
@@ -212,7 +200,7 @@ implementation {
     enableTransmit();
     opo_buffer_count++;
     //call Leds.led0On();
-    
+
     if(opo_buffer_index >= 80 || opo_buffer_count >= 40) {
       post WriteInfoToDisk();
     }
@@ -242,8 +230,8 @@ implementation {
   }
 
   /*
-   * Sets up the next ranging sequence. 
-   * Increments the ranging sequence and puts the chip into receive mode. 
+   * Sets up the next ranging sequence.
+   * Increments the ranging sequence and puts the chip into receive mode.
   */
   event void RangeStopTimer.fired() {
     stopTransducer();
@@ -262,17 +250,17 @@ implementation {
    * Guard timers are NOT set up here since this an async event.
   */
   async event void UltrasonicCapture.captured(uint16_t time) {
-    // One interrupt per ultrasonic pulse. 
+    // One interrupt per ultrasonic pulse.
     call UltrasonicCapture.setEdge(MSP430TIMER_CM_NONE);
     call UCapControl.clearPendingInterrupt();
     //call Leds.led1On();
-    
+
     // Wake up pulse
-    if(m_state == RX_WAKE) { 
+    if(m_state == RX_WAKE) {
       m_state = RX_RANGE;
       call RfControl.start();
     }
- 
+
     // Ranging Pulse
     else {
       utime = time; // Get pulse time
@@ -280,13 +268,13 @@ implementation {
         //Speed of sound = 10634 uM / tick
         atomic range = (utime - sfd_time) * 10634; // range in microm
       }
-      atomic { 
+      atomic {
         opo_store_buffer[opo_buffer_index].range = range;
         if(rfValid == TRUE) {
           post WriteTimeToRecord();
         }
       }
-    } 
+    }
 
     if (call UltrasonicCapture.isOverflowPending()) {
       call UltrasonicCapture.clearOverflow();
@@ -294,19 +282,19 @@ implementation {
   }
 
   /*
-   * Captures time of SFD line going high. 
-   * AmReceive confirms correct packet and sets rfValid to last SFD high 
+   * Captures time of SFD line going high.
+   * AmReceive confirms correct packet and sets rfValid to last SFD high
   */
   async event void SFDCapture.captured(uint16_t time) {
     // Right now we capture the time of the FIRST SFD high we see
     if(m_state == RX_RANGE && sfd_time == 0) {
-      atomic sfd_time = time; 
+      atomic sfd_time = time;
       call UltrasonicCapture.setEdge(MSP430TIMER_CM_RISING);
     }
     else if(m_state == TX) {
       call SFDLatch.set();
     }
-    
+
     if (call SFDCapture.isOverflowPending()) {
       call SFDCapture.clearOverflow();
     }
@@ -322,7 +310,7 @@ implementation {
     enableReceive();
   }
 
-  /* 
+  /*
    * Used to delay the ultrasonic interrupt enable.
    * Compensates for the voltage spike from switching the analog switch.
   */
@@ -337,7 +325,7 @@ implementation {
     if(m_state == TX) {
       opo_rf_msg_t *payload;
       int i;
-      payload = (opo_rf_msg_t*) call AMSend.getPayload(&packet, 
+      payload = (opo_rf_msg_t*) call AMSend.getPayload(&packet,
                                                        sizeof(opo_rf_msg_t));
       payload -> sequence = range_sequence;
       payload -> tx_pwr = call CC2420Packet.getPower(&packet);
@@ -346,12 +334,12 @@ implementation {
       }
 
       call SFDCapture.setEdge(MSP430TIMER_CM_RISING);
-      call AMSend.send(AM_BROADCAST_ADDR, 
-                       &packet, 
+      call AMSend.send(AM_BROADCAST_ADDR,
+                       &packet,
                        sizeof(opo_rf_msg_t));
     }
     else if (m_state == RX_RANGE) {
-      call WakeStartTimer.stop(); 
+      call WakeStartTimer.stop();
       call RxGuardTimer.startOneShot(75);
     }
     else if (m_state == BASE_SEND) {
@@ -367,15 +355,15 @@ implementation {
       }
       p -> rec.rssi = opo_store_buffer[opo_buffer_index - 1].rssi;
       p -> rec.tx_pwr = opo_store_buffer[opo_buffer_index - 1].tx_pwr;
-      p -> rec.seconds = opo_store_buffer[opo_buffer_index - 1].seconds; 
-      p -> rec.minutes = opo_store_buffer[opo_buffer_index - 1].minutes; 
+      p -> rec.seconds = opo_store_buffer[opo_buffer_index - 1].seconds;
+      p -> rec.minutes = opo_store_buffer[opo_buffer_index - 1].minutes;
       p -> rec.hours = opo_store_buffer[opo_buffer_index - 1].hours;
-      
+
       for(i = 0; i < 6; i++) {
         p -> m_id[i] = m_id[i];
       }
-      call BaseSend.send(AM_BROADCAST_ADDR, 
-                       &packet, 
+      call BaseSend.send(AM_BROADCAST_ADDR,
+                       &packet,
                        sizeof(opo_bmsg_t));
     }
   }
@@ -417,7 +405,7 @@ implementation {
       opo_store_buffer[opo_buffer_index].sequence = mData -> sequence;
       for(i = 0; i < 6; i++) {
         opo_store_buffer[opo_buffer_index].o_id[i] = mData -> m_id[i];
-      } 
+      }
       opo_store_buffer[opo_buffer_index].rssi = call CC2420Packet.getRssi(msg);
       opo_store_buffer[opo_buffer_index].tx_pwr = mData -> tx_pwr;
 
@@ -430,15 +418,15 @@ implementation {
 
     }
     return msg;
-    
+
   }
 
    event void CC2420Config.syncDone(error_t error) {}
 
 /******************** Block Storage Stuff *************************************/
-   
-  event void BlockWrite.writeDone(storage_addr_t addr, 
-                       void* buf, storage_len_t len, 
+
+  event void BlockWrite.writeDone(storage_addr_t addr,
+                       void* buf, storage_len_t len,
                        error_t error) {
     call BlockWrite.sync();
   }
@@ -449,7 +437,7 @@ implementation {
     }
     else {
       setupUltrasonicPWM();
-      setupPins();  
+      setupPins();
 
       setRandGuard();
       call WakeStartTimer.startOneShot(wakestartmin + randguard);
@@ -478,37 +466,16 @@ implementation {
       setRandGuard();
       call WakeStartTimer.startOneShot(wakestartmin + randguard);
       call At45dbPowerDownTimer.startOneShot(1000);
-      printf("SD\n");
-      printfflush();
     }
   }
 
-  event void BlockRead.readDone(storage_addr_t addr, 
-                      void* buf, storage_len_t len, 
+  event void BlockRead.readDone(storage_addr_t addr,
+                      void* buf, storage_len_t len,
                       error_t error) {
 
     flash_r_addr += sizeof(opo_rec_t);
-    
+
     if(opo_read_store.valid == flash_valid) {
-      int i = 0;
-      printf("m_id:0x");
-      for(i = 0; i < 6; i++) {
-        printf("%x", m_id[i]);
-      }
-      printf("\n");
-      printf("o_id:0x");
-      for(i = 0; i < 6; i++) {
-        printf("%x", opo_read_store.o_id[i]);
-      }
-      printf("\n");
-      printf("r:%lu\n", opo_read_store.range);
-      printf("sq:%lu\n", opo_read_store.sequence);
-      printf("s:%u\n", opo_read_store.seconds);
-      printf("m:%u\n", opo_read_store.minutes);
-      printf("h:%u\n", opo_read_store.hours);
-      printf("rs:%i\n", opo_read_store.rssi);
-      printf("tx:%u\n", opo_read_store.tx_pwr);
-      printfflush();
       call ReadTimer.startOneShot(70);
     }
     else {
@@ -522,19 +489,19 @@ implementation {
       call BlockWrite.write(m_index, &zerowrite, sizeof(uint8_t) * 16);
   }
 
-  event void BlockRead.computeCrcDone(storage_addr_t addr, 
+  event void BlockRead.computeCrcDone(storage_addr_t addr,
                             storage_len_t len,
                             uint16_t crc, error_t error) {}
 
   event void At45dbPower.startDone(error_t err) {
     if(firstBoot == TRUE) {
-      call BlockRead.read(flash_r_addr, 
-                          &opo_read_store, 
+      call BlockRead.read(flash_r_addr,
+                          &opo_read_store,
                           sizeof(opo_read_store));
     }
     else {
-      call BlockWrite.write(flash_w_addr, 
-                          &opo_store_buffer, 
+      call BlockWrite.write(flash_w_addr,
+                          &opo_store_buffer,
                           ( (opo_buffer_index) * sizeof(opo_rec_t) ) );
     }
   }
@@ -545,9 +512,9 @@ implementation {
     call BlockRead.read(flash_r_addr, &opo_read_store, sizeof(opo_read_store));
   }
 
-  /* 
-   * This timer is used to delay the deep power down command, which if given 
-   * While the at45db is still doing i/o results in bad things. 
+  /*
+   * This timer is used to delay the deep power down command, which if given
+   * While the at45db is still doing i/o results in bad things.
   */
   event void At45dbPowerDownTimer.fired() {
     call At45dbPower.stop();
@@ -610,7 +577,7 @@ implementation {
     // set up SFD Latch
     call SFDLatch.makeOutput();
 
-    // Sets up Ultrasonic Time Capture, although not enabled on any edge 
+    // Sets up Ultrasonic Time Capture, although not enabled on any edge
     call UCapGpIO.selectModuleFunc();
     call UCapGpIO.makeInput();
     call UCapControl.setControlAsCapture(1);
@@ -623,9 +590,9 @@ implementation {
 
   }
 
-  /* 
-   * TACCR0 = Compare Register, what the timer counts to before rolling over 
-   * TACCR1 = Compare register, triggers output changes. 
+  /*
+   * TACCR0 = Compare Register, what the timer counts to before rolling over
+   * TACCR1 = Compare register, triggers output changes.
    * Zero these out to disable the ultrasonic PWM
   */
   inline void startTransducer() {
@@ -635,40 +602,40 @@ implementation {
     }
   }
 
-  inline void stopTransducer() {      
+  inline void stopTransducer() {
     atomic {
       TACCR0 = 0x0000;
-      TACCR1 = 0x0000; 
+      TACCR1 = 0x0000;
     }
   }
 
   /*
-   * Sets up Timer A for PWM. 
-   * Specifically, this sets up TACCTL1, or Timer A Compare Output 1. 
+   * Sets up Timer A for PWM.
+   * Specifically, this sets up TACCTL1, or Timer A Compare Output 1.
   */
   inline void setupUltrasonicPWM() {
 
     // Sets Port16 to be a Timer A module and an output.
-    P1SEL = P1SEL | BIT6; 
-    P1DIR = P1DIR | BIT6; 
+    P1SEL = P1SEL | BIT6;
+    P1DIR = P1DIR | BIT6;
 
     // Timer A PWM signal controlled by TACCR0 and TACCR1
-    // See Start and Stop Transducer for more.     
-    // TACTl = Timer A Control Register 
+    // See Start and Stop Transducer for more.
+    // TACTl = Timer A Control Register
     // TASSEL_2 = Timer A Clock Source select 2 - SMCLK
     // ID_1 = Timer A Input (Clock) Divider - 2
     // MC_1 = Mode Control - Up Mode
-    // TAIE = Interrupt Enabled 
+    // TAIE = Interrupt Enabled
     atomic {
       TACTL = 0x0000;
       TACTL = TASSEL_2 | ID_1 | MC_1;
     }
-     
+
     // Timer A Compare register settings
     // CM0 = Capture Mode 0 - Compare instead of Capture
     // CCIS_0 = Capture/compare input select done from CCI1A
     // OUTMOD_3 = Outmode 3, PWM Set on TACCR1, Reset on TACCR0
-    // CCIE = Interrupt Enabled 
+    // CCIE = Interrupt Enabled
     atomic {
       TACCTL1 = 0x0000;
       TACCTL1 = CM0 | CCIS_0 | OUTMOD_3 | CCIE;
@@ -686,9 +653,9 @@ implementation {
    * Enables Ultrasnoic Pulse capture
    * Sets SPDT to Receive and turns off Tx power gate
    * Sets up default values
-   * this and enableTransmit are oppositues, so you 
+   * this and enableTransmit are oppositues, so you
    * cannot receive and transmit at the same time
-  */ 
+  */
   inline void enableReceive() {
 
     if(opo_buffer_index >= 80) {
@@ -701,7 +668,7 @@ implementation {
 
       atomic{
           sfd_time = 0;
-          rfValid = FALSE; 
+          rfValid = FALSE;
           utime = 0;
           range = 0;
           m_state = RX_WAKE;
@@ -710,8 +677,8 @@ implementation {
     }
   }
 
-  /* 
-   * Disables Ultrasonic and SFD Capture 
+  /*
+   * Disables Ultrasonic and SFD Capture
    * Sets up SPDT and turns on tx power gate (pfet)
    * Changes isTx to True
    * this and enableReceive are opposites, so you
@@ -723,17 +690,17 @@ implementation {
 
     call TxRxSel.set();
     call TxGate.clr();
-    
+
     atomic{
       m_state = TX;
     }
   }
 
-  /* 
+  /*
    * Sets ranguard to a random multiple of 5, ranging from 0 - 50
-   * Meant to be used as a randomized guard time, where the time is 
+   * Meant to be used as a randomized guard time, where the time is
    * calculated in ms
-  */ 
+  */
   inline void setRandGuard() {
     atomic{
       randguard = call Random.rand32();

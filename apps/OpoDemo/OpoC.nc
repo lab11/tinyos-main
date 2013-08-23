@@ -1,5 +1,4 @@
 #include "Opo.h"
-#include "printf.h"
 #include "StorageVolumes.h"
 configuration OpoC {}
 
@@ -12,15 +11,12 @@ implementation {
   OpoP.RandInit -> RandomMtC;
   OpoP.IdReader -> Ds2411C;
 
-  components new BlockStorageC(VOLUME_BLOCKSTORE); 
+  components new BlockStorageC(VOLUME_BLOCKSTORE);
   OpoP.BlockRead -> BlockStorageC.BlockRead;
   OpoP.BlockWrite -> BlockStorageC.BlockWrite;
 
   components At45dbPowerC;
   OpoP.At45dbPower -> At45dbPowerC.SplitControl;
-
-  components PrintfC;
-  components SerialStartC;
 
   components ActiveMessageC;
   components new AMSenderC(AM_URANGE) as AMSend;
@@ -48,7 +44,7 @@ implementation {
   components Msp430TimerC;
   OpoP.SFDCapture -> Msp430TimerC.SFDCAPTURE;
   OpoP.SFDCapControl -> Msp430TimerC.SFDCAPCONT;
-  OpoP.UltrasonicCapture -> Msp430TimerC.UCAPTURE; 
+  OpoP.UltrasonicCapture -> Msp430TimerC.UCAPTURE;
   OpoP.UCapControl -> Msp430TimerC.UCAPCONT;
 
   components RV4162C;
@@ -56,8 +52,8 @@ implementation {
 
   components new TimerMilliC() as WakeStartTimer;
   components new TimerMilliC() as WakeStopTimer;
-  components new TimerMilliC() as RangeStartTimer; 
-  components new TimerMilliC() as RangeStopTimer;  
+  components new TimerMilliC() as RangeStartTimer;
+  components new TimerMilliC() as RangeStopTimer;
   components new TimerMilliC() as RxGuardTimer;
   components new TimerMilliC() as UCapStartTimer;
   components new TimerMilliC() as ReadTimer;
@@ -65,7 +61,7 @@ implementation {
   components new TimerMilliC() as ZeroWriterTimer;
   components new TimerMilliC() as ResetTimeTimer;
   components new TimerMilliC() as RxResetTimer;
-  components new TimerMilliC() as BaseSendTimer; 
+  components new TimerMilliC() as BaseSendTimer;
   OpoP.WakeStartTimer -> WakeStartTimer;
   OpoP.WakeStopTimer -> WakeStopTimer;
   OpoP.RangeStartTimer -> RangeStartTimer;
