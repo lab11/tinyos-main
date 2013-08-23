@@ -36,9 +36,9 @@ module OpoP {
 
 implementation {
 
-  enum {RX, TX, IDLE} opo_state;
-  enum {RX_SETUP, RX_WAKE, RX_RANGE, RX_IDLE} opo_rx_state;
-  enum {TX_WAKE, TX_WAKE_STOP, TX_RANGE, TX_RANGE_STOP, TX_IDLE} opo_tx_state;
+  enum {RX, TX, IDLE} opo_state = IDLE;
+  enum {RX_SETUP, RX_WAKE, RX_RANGE, RX_IDLE} opo_rx_state = RX_IDLE;
+  enum {TX_WAKE, TX_WAKE_STOP, TX_RANGE, TX_RANGE_STOP, TX_IDLE} opo_tx_state = TX_IDLE;
 
   message_t *tx_packet;
   size_t tx_psize;
@@ -61,8 +61,8 @@ implementation {
   ============================================================================*/
 
   command error_t Opo.transmit(message_t* packet, size_t psize) {
-    if (opo_state == IDLE) {
-      signal Opo.transmit_done();
+    if (opo_state != IDLE) {
+      signal Opo.transmit_failed();
     }
     else {
       call UltrasonicCapture.setEdge(MSP430TIMER_CM_NONE);
@@ -120,7 +120,12 @@ implementation {
   ============================================================================*/
 
   command error_t Opo.enable_receive() {
-    setupRx();
+    if(opo_state != IDLE) {
+      signal Opo.enable_receive_failed();
+    }
+    else {
+      setupRx();
+    }
   }
 
   command error_t Opo.disable_receive() {
@@ -128,13 +133,16 @@ implementation {
   }
 
   async event void UltrasonicCapture.captured(uint16_t time) {
+    opo_state = RX;
     call UltrasonicCapture.setEdge(MSP430TIMER_CM_NONE);
     call UCapControl.clearPendingInterrupt();
 
     if(opo_rx_state == RX_WAKE) {
+      call Leds.led0Toggle();
       call RxTimer.startOneShot(25);
     }
     else {
+        call Leds.led1Toggle();
         if (time > sfd_time && sfd_time != 0) {
           range = (time - sfd_time) * 10634; // range in microm
         }
@@ -311,7 +319,6 @@ implementation {
       sfd_time = 0;
       rx_msg = NULL;
       range = 0;
-      opo_state = RX;
       opo_rx_state = RX_SETUP;
 
       call RxTimer.startOneShot(30);
