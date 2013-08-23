@@ -1,4 +1,3 @@
-#include "printf.h"
 #include "OpoTx.h"
 
 module OpoTxP {
@@ -38,8 +37,6 @@ implementation {
 
         call Opo.setup_pins();
         call TxTimer.startOneShot(2000);
-        printf("BOOTED\n");
-        printfflush();
     }
 
     event void TxTimer.fired() {
@@ -63,6 +60,8 @@ implementation {
 
     event void Opo.receive(uint32_t range, message_t* msg) {}
     event void Opo.receive_failed() {}
+    event void Opo.transmit_failed() {}
+    event void Opo.enable_receive_failed() {}
 
     event void At45dbPower.startDone(error_t err) {}
     event void At45dbPower.stopDone(error_t err) {}
