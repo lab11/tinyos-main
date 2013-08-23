@@ -1,22 +1,18 @@
-#include "printf.h"
 configuration OpoPowerC {}
 
 implementation {
-    components MainC, PrintfC, SerialStartC, OpoPowerP;
+    components MainC, OpoPowerP;
     OpoPowerP.Boot -> MainC.Boot;
-
-    components ActiveMessageC;
-    OpoPowerP.RfControl -> ActiveMessageC.SplitControl;
 
     components At45dbPowerC;
     OpoPowerP.FlashPower -> At45dbPowerC.SplitControl;
 
+    components HplLIS3DHTRC;
+    OpoPowerP.HplLIS3DHTR -> HplLIS3DHTRC.HplLIS3DHTR;
+
     components new TimerMilliC() as PowerTimer;
     OpoPowerP.PowerTimer -> PowerTimer;
 
-    components HplMsp430GeneralIOC;
-    OpoPowerP.VPIN -> HplMsp430GeneralIOC.Port45;
-
-
-
+    //components HplMsp430GeneralIOC;
+    //OpoPowerP.VPIN -> HplMsp430GeneralIOC.Port45;
 }
