@@ -65,8 +65,7 @@ implementation {
       signal Opo.transmit_failed();
     }
     else {
-      call UltrasonicCapture.setEdge(MSP430TIMER_CM_NONE);
-      call SFDCapture.setEdge(MSP430TIMER_CM_NONE);
+      disableRx();
 
       call TxRxSel.set();
       call TxGate.clr();
@@ -104,6 +103,7 @@ implementation {
       call SFDLatch.clr();
       stopTransducer();
       opo_state = IDLE;
+      opo_tx_state = TX_IDLE;
       signal Opo.transmit_done();
     }
   }
@@ -138,11 +138,9 @@ implementation {
     call UCapControl.clearPendingInterrupt();
 
     if(opo_rx_state == RX_WAKE) {
-      call Leds.led0Toggle();
       call RxTimer.startOneShot(25);
     }
     else {
-        call Leds.led1Toggle();
         if (time > sfd_time && sfd_time != 0) {
           range = (time - sfd_time) * 10634; // range in microm
         }
