@@ -12,6 +12,9 @@ configuration OpoC {
 }
 
 implementation {
+  #ifdef OPO_DEBUG
+  components SerialStartC, PrintfC;
+  #endif
 
   Opo = OpoP.Opo;
 

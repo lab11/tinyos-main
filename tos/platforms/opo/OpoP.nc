@@ -37,7 +37,7 @@ module OpoP {
 implementation {
 
   enum {RX, TX, IDLE} opo_state = IDLE;
-  enum {RX_SETUP, RX_WAKE, RX_RANGE, RX_IDLE} opo_rx_state = RX_IDLE;
+  enum {RX_SETUP, RX_WAKE, RX_RANGE, RX_DONE, RX_IDLE} opo_rx_state = RX_IDLE;
   enum {TX_WAKE, TX_WAKE_STOP, TX_RANGE, TX_RANGE_STOP, TX_IDLE} opo_tx_state = TX_IDLE;
 
   message_t *tx_packet;
@@ -46,7 +46,9 @@ implementation {
 
   // Timing and ranging
   uint32_t sfd_time = 0; // SFD trigger time.
+  uint32_t u_time = 0;
   uint32_t range = 0; // Based on ToF difference between rf and ultrasonic
+  bool rx_rf_done = FALSE;
 
   /* Helper function prototypes */
   void startTransducer(); // starts PWM to drive Ultrasonic Transducers
@@ -54,6 +56,7 @@ implementation {
   void setupUltrasonicPWM(); // Sets up TimerA for PWM
   void setupRx(); // sets up Opo for receiving
   void disableRx(); // disables ultrasoinc capture, timers, etc
+
 
   /*============================= Opo Transmit =================================
    1) Ultrasonic Wake Up Pulse
@@ -133,14 +136,16 @@ implementation {
   }
 
   async event void UltrasonicCapture.captured(uint16_t time) {
-    opo_state = RX;
     call UltrasonicCapture.setEdge(MSP430TIMER_CM_NONE);
     call UCapControl.clearPendingInterrupt();
+    opo_state = RX;
 
     if(opo_rx_state == RX_WAKE) {
-      call RxTimer.startOneShot(25);
+      opo_rx_state = RX_RANGE;
+      call RxTimer.startOneShot(40);
     }
     else {
+        u_time = time;
         if (time > sfd_time && sfd_time != 0) {
           range = (time - sfd_time) * 10634; // range in microm
         }
@@ -152,7 +157,7 @@ implementation {
   }
 
   async event void SFDCapture.captured(uint16_t time) {
-    if(opo_rx_state == RX_RANGE && sfd_time == 0) {
+    if(opo_rx_state == RX_DONE && sfd_time == 0) {
       sfd_time = time;
       call UltrasonicCapture.setEdge(MSP430TIMER_CM_RISING);
     }
@@ -168,6 +173,7 @@ implementation {
   event message_t* Receive.receive(message_t *msg, void *payload, uint8_t len) {
     if(opo_state == RX) {
       rx_msg = msg;
+      atomic rx_rf_done = TRUE;
       call RfControl.stop();
     }
 
@@ -179,11 +185,23 @@ implementation {
       opo_rx_state = RX_WAKE;
       call UltrasonicCapture.setEdge(MSP430TIMER_CM_RISING);
     }
-    else if(opo_rx_state == RX_WAKE) {
+    else if(opo_rx_state == RX_RANGE) {
       call RfControl.start();
     }
-    else if(opo_rx_state == RX_RANGE) {
+    else if(opo_rx_state == RX_DONE) {
+      disableRx();
+      #ifdef OPO_DEBUG
+      printf("OpoRxTimerDone\n");
+      printfflush();
+      #endif
       call RfControl.stop();
+      if(range > 0 && rx_msg != NULL) {
+        signal Opo.receive(range, rx_msg);
+      }
+      else {
+        signal Opo.receive_failed();
+      }
+
     }
   }
 
@@ -199,22 +217,12 @@ implementation {
                        tx_psize);
     }
     else if(opo_state == RX) {
-      opo_rx_state = RX_RANGE;
-      call RxTimer.startOneShot(50);
+      opo_rx_state = RX_DONE;
+      call RxTimer.startOneShot(100);
     }
   }
 
-  event void RfControl.stopDone(error_t err) {
-    if(opo_state == RX) {
-      disableRx();
-      if(range > 0 && rx_msg != NULL) {
-        signal Opo.receive(range, rx_msg);
-      }
-      else {
-        signal Opo.receive_failed();
-      }
-    }
-  }
+  event void RfControl.stopDone(error_t err) {}
   /*============================= Setup ========================================
     Stuff to setup pins and MCU modules.
   ============================================================================*/
@@ -317,6 +325,8 @@ implementation {
       sfd_time = 0;
       rx_msg = NULL;
       range = 0;
+      u_time = 0;
+      rx_rf_done = FALSE;
       opo_rx_state = RX_SETUP;
 
       call RxTimer.startOneShot(30);

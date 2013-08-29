@@ -17,4 +17,6 @@
 #define SFD_CAPTURE_CONTROL      ControlB1
 #define U_CAPTURE_CONTROL        ControlB3
 
+//#define OPO_DEBUG
+
 #endif
