@@ -1,10 +1,9 @@
-#include "printf.h"
 #include "OpoRx.h"
 
 configuration OpoRxC {}
 
 implementation {
-    components OpoRxP, MainC, LedsC, PrintfC, SerialStartC;
+    components MainC, LedsC, PrintfC, SerialStartC, OpoRxP;
     OpoRxP.Boot -> MainC.Boot;
     OpoRxP.Leds -> LedsC.Leds;
 
