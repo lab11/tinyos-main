@@ -4,7 +4,6 @@
 #define CC2420_DEF_CHANNEL 15
 #define OPO_CHANNEL 15
 #define BASE_CHANNEL 16
-#define OPO_DEBUG
 
 /* SFD stuff */
 #define	SFDPIN			Port26 //Alternative line to generate SFD interrupts
@@ -12,14 +11,14 @@
 #define SFDCAPPIN		Port41
 
 /* Gate Control ports */
-#define TXRXSEL			Port50 // Controls the SPDT switch 
+#define TXRXSEL			Port50 // Controls the SPDT switch
 #define TXGATE			Port53 // This powergates the transmit side
 
 /* Ultrasonic Rx Stuff */
 #define UCAPPIN         Port43
 #define AMP3_ADC        Port60
 
-#define SFDCAPTURE      CaptureB1 
+#define SFDCAPTURE      CaptureB1
 #define UCAPTURE        CaptureB3
 #define SFDCAPCONT      ControlB1
 #define UCAPCONT        ControlB3
@@ -35,8 +34,8 @@ typedef nx_struct opo_rec_msg {
     nx_uint8_t o_id[6]; // ID from transmitter's (other node's) ds2411
     nx_int8_t rssi;
     nx_uint8_t tx_pwr;
-    nx_uint8_t seconds; 
-    nx_uint8_t minutes; 
+    nx_uint8_t seconds;
+    nx_uint8_t minutes;
     nx_uint8_t hours;
 } opo_rec_t;
 
