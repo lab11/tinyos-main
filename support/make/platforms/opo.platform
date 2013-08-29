@@ -38,6 +38,7 @@ PFLAGS += -I%T/lib/onewire
 PFLAGS += -I%T/lib/timer
 PFLAGS += -I%T/lib/serial
 PFLAGS += -I%T/lib/power
+PFLAGS += -I%T/lib/printf
 
 # Extra options for epic platform
 PFLAGS += -mmcu=msp430f1611
