@@ -1,11 +1,10 @@
-#include "printf.h"
 #include "OpoBase.h"
+#include "printf.h"
 
 module OpoBaseP {
   uses {
-    interface AMSend as OpoAckSend;
-    interface Receive as DataReceive;
-    interface Receive as ProbeReceive;
+    interface Receive as OpoReceive;
+    interface Receive as BlinkReceive;
     interface SplitControl as RfControl;
     interface AMPacket;
     interface Boot;
@@ -14,8 +13,6 @@ module OpoBaseP {
 }
 
 implementation {
-  message_t packet;
-  bool sendLock = FALSE;
 
   event void Boot.booted() {
     call RfControl.start();
@@ -23,7 +20,7 @@ implementation {
     printfflush();
   }
 
-  event message_t* DataReceive.receive(message_t *msg, void *payload, uint8_t len) {
+  event message_t* OpoReceive.receive(message_t *msg, void *payload, uint8_t len) {
     opo_bmsg_t *data = (opo_bmsg_t *) payload;
     int i;
     uint32_t total_time = 0;
@@ -49,21 +46,25 @@ implementation {
     return msg;
   }
 
-  event message_t* ProbeReceive.receive(message_t *msg, void *payload, uint8_t len) {
-    am_addr_t return_addr = call AMPacket.source(msg);
-    message_t p;
-    atomic {
-      if (sendLock == FALSE) {
-        sendLock = TRUE;
-        call OpoAckSend.send(return_addr, &packet, 0);
-      }
-    }
-    
-    return msg;
-  }
+  event message_t* BlinkReceive.receive(message_t *msg, void *payload, uint8_t len) {
+    oblink_base_msg_t *data = (oblink_base_msg_t *) payload;
+    int i;
 
-  event void OpoAckSend.sendDone(message_t *msg, error_t error) {
-    atomic sendLock = FALSE;
+    printf("Range: %u\n", data->range);
+    printf("M_ID: 0x");
+    for(i=0; i < 6; i++) {
+      printf("%x", data->m_id[i]);
+    }
+    printf("\n");
+    printf("O_ID: 0x");
+    for(i=0; i < 6; i++) {
+      printf("%x", data->o_id[i]);
+    }
+    printf("\n");
+
+    printfflush();
+    return msg
+;
   }
 
   event void RfControl.startDone(error_t err) {}

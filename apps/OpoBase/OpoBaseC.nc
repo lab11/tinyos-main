@@ -1,25 +1,18 @@
 #include "OpoBase.h"
-#include "printf.h"
 
 configuration OpoBaseC {}
 
 implementation {
-  components MainC, OpoBaseP, LedsC;
+  components MainC, LedsC, SerialStartC, PrintfC, OpoBaseP;
   OpoBaseP.Boot -> MainC.Boot;
   OpoBaseP.Leds -> LedsC;
 
-  components PrintfC;
-  components SerialStartC;
-
   components ActiveMessageC;
-  components new AMSenderC(OPO_ACK) as OpoAckSend;
-  components new AMReceiverC(OPO_PROBE) as ProbeReceive;
-  components new AMReceiverC(OPO_DATA) as DataReceive;
+  components new AMReceiverC(OPO_DATA) as OpoReceive;
+  components new AMReceiverC(OPO_BLINK) as BlinkReceive;
 
-  OpoBaseP.ProbeReceive -> ProbeReceive;
-  OpoBaseP.OpoAckSend -> OpoAckSend;
-  OpoBaseP.DataReceive -> DataReceive;
+  OpoBaseP.OpoReceive -> OpoReceive;
+  OpoBaseP.BlinkReceive -> BlinkReceive;
   OpoBaseP.RfControl -> ActiveMessageC.SplitControl;
   OpoBaseP.AMPacket -> ActiveMessageC.AMPacket;
-
 }
