@@ -27,10 +27,20 @@ typedef nx_struct opo_blink_base_msg {
     nx_uint32_t range;
 } oblink_base_msg_t;
 
+typedef nx_struct opo_visual_base_msg {
+    nx_uint8_t  rx_id[6];
+    nx_uint8_t  tx_id[6];
+    nx_uint32_t range;
+    nx_uint8_t sec;
+    nx_uint8_t min;
+    nx_uint8_t h;
+} ovis_base_msg_t;
+
 
 enum {
     OPO_DATA = 20,
-    OPO_BLINK = 21
+    OPO_BLINK = 21,
+    OPO_VISUAL_BASE = 22
 };
 
 #endif

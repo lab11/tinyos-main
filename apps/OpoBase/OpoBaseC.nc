@@ -10,9 +10,11 @@ implementation {
   components ActiveMessageC;
   components new AMReceiverC(OPO_DATA) as OpoReceive;
   components new AMReceiverC(OPO_BLINK) as BlinkReceive;
+  components new AMReceiverC(OPO_VISUAL_BASE) as VisualReceive;
 
   OpoBaseP.OpoReceive -> OpoReceive;
   OpoBaseP.BlinkReceive -> BlinkReceive;
+  OpoBaseP.VisualReceive -> VisualReceive;
   OpoBaseP.RfControl -> ActiveMessageC.SplitControl;
   OpoBaseP.AMPacket -> ActiveMessageC.AMPacket;
 }

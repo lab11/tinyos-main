@@ -5,6 +5,7 @@ module OpoBaseP {
   uses {
     interface Receive as OpoReceive;
     interface Receive as BlinkReceive;
+    interface Receive as VisualReceive;
     interface SplitControl as RfControl;
     interface AMPacket;
     interface Boot;
@@ -63,11 +64,42 @@ implementation {
     printf("\n");
 
     printfflush();
-    return msg
-;
+    return msg;
   }
 
-  event void RfControl.startDone(error_t err) {}
+  event message_t* VisualReceive.receive(message_t *msg, void *payload, uint8_t len) {
+    ovis_base_msg_t *data = (ovis_base_msg_t *) payload;
+    int i;
+    uint32_t total_time;
+
+    printf("OPO_VIS\n");
+
+    printf("Range: %lu\n", data->range);
+    printf("RX_ID: 0x");
+    for(i=0; i < 6; i++) {
+      printf("%x", data->rx_id[i]);
+    }
+    printf("\n");
+    printf("TX_ID: 0x");
+    for(i=0; i < 6; i++) {
+      printf("%x", data->tx_id[i]);
+    }
+    printf("\n");
+
+    total_time = data->sec;
+    total_time += data->min * 60;
+    total_time += data->h * 3600;
+
+    printf("Time: %lu\n", total_time);
+
+    printfflush();
+    return msg;
+  }
+
+  event void RfControl.startDone(error_t err) {
+    printf("RfStartDone\n");
+    printfflush();
+  }
   event void RfControl.stopDone(error_t err) {}
 
 }
