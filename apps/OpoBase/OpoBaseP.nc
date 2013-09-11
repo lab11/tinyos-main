@@ -72,9 +72,8 @@ implementation {
     int i;
     uint32_t total_time;
 
-    printf("OPO_VIS\n");
-
-    printf("Range: %lu\n", data->range);
+    printf("GID: 2\n");
+    printf("RANGE: %lu\n", data->range);
     printf("RX_ID: 0x");
     for(i=0; i < 6; i++) {
       printf("%x", data->rx_id[i]);
@@ -90,7 +89,7 @@ implementation {
     total_time += data->min * 60;
     total_time += data->h * 3600;
 
-    printf("Time: %lu\n", total_time);
+    printf("TIME: %lu\n", total_time);
 
     printfflush();
     return msg;
