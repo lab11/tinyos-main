@@ -15,6 +15,7 @@ module OpoVisualDemoP {
         interface Opo;
         interface Timer<TMilli> as TxTimer;
         interface Timer<TMilli> as RxTimer;
+        interface Timer<TMilli> as RTCTimer;
         interface PacketAcknowledgements as PacketAcks;
         interface AMSend as BaseSend;
         interface SplitControl as RfControl;
@@ -53,14 +54,13 @@ implementation {
         p = (ovis_msg_t*) call Packet.getPayload(&packet,
                                                    sizeof(ovis_msg_t));
         bp = (ovis_base_msg_t*) call Packet.getPayload(&base_packet,
-                                                         sizeof(base_packet));
+                                                         sizeof(ovis_base_msg_t));
         for(i = 0; i < 6; i++) {
             p -> tx_id[i] = m_id[i];
             bp -> rx_id[i] = m_id[i];
         }
 
-        call RxTimer.startOneShot(70);
-        call TxTimer.startOneShot(2000 + guard);
+        call HplRV4162.writeSTBit();
 
         #ifdef OPO_DEBUG
         printf("Booted\n");
@@ -78,7 +78,7 @@ implementation {
             call Opo.enable_receive();
         }
         else if (ovis_rx_state == BASE_SEND) {
-            call RfControl.start();
+            call HplRV4162.readFullTime();
         }
     }
 
@@ -114,6 +114,8 @@ implementation {
     }
 
     event void Opo.receive(uint32_t range, message_t* msg) {
+        uint8_t i;
+        ovis_msg_t *data = call Packet.getPayload(msg, sizeof(ovis_msg_t));
         #ifdef OPO_DEBUG
         printf("Range: %lu\n", range);
         printfflush();
@@ -125,7 +127,13 @@ implementation {
         dt = call TxTimer.getdt();
         rt = dt - (tn - t0);
 
+        bp->range = range;
+        for(i=0; i<6; i++) {
+            bp->tx_id[i] = data->tx_id[i];
+        }
+
         ovis_rx_state = BASE_SEND;
+        call CC2420Config.setChannel(BASE_CHANNEL);
         call RxTimer.startOneShot(5 + guard);
     }
 
@@ -152,14 +160,11 @@ implementation {
         printf("BSD\n");
         printfflush();
         #endif
-
-        call CC2420Config.setChannel(OPO_CHANNEL);
         call RfControl.stop();
     }
 
     event void RfControl.startDone(error_t err) {
         if(ovis_rx_state == BASE_SEND) {
-            call CC2420Config.setChannel(BASE_CHANNEL);
             call BaseSend.send(AM_BROADCAST_ADDR,
                                &base_packet,
                                sizeof(ovis_base_msg_t));
@@ -169,18 +174,33 @@ implementation {
     event void RfControl.stopDone(error_t err) {
         if(ovis_rx_state == BASE_SEND) {
             ovis_rx_state = ENABLE_RX;
+            call CC2420Config.setChannel(OPO_CHANNEL);
             call RxTimer.startOneShot(70);
             call TxTimer.startOneShot(rt);
         }
     }
 
-    event void HplRV4162.readFullTimeDone(error_t err, uint8_t *fullTime) {}
+    event void RTCTimer.fired() {
+        call HplRV4162.resetTime();
+    }
 
-    event void HplRV4162.writeSTBitDone(error_t err) {}
+    event void HplRV4162.readFullTimeDone(error_t err, uint8_t *fullTime) {
+        bp->sec = fullTime[1];
+        bp->min = fullTime[2];
+        bp->h = fullTime[3];
+        call RfControl.start();
+    }
+
+    event void HplRV4162.writeSTBitDone(error_t err) {
+        call RTCTimer.startOneShot(20);
+    }
 
     event void HplRV4162.setTimeDone(error_t err) {}
 
-    event void HplRV4162.resetTimeDone(error_t err) {}
+    event void HplRV4162.resetTimeDone(error_t err) {
+        call RxTimer.startOneShot(70);
+        call TxTimer.startOneShot(2000 + guard);
+    }
 
     event void FlashPower.startDone(error_t err) {}
     event void FlashPower.stopDone(error_t err) {}

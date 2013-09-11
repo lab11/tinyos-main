@@ -42,7 +42,9 @@ implementation {
 
     components new TimerMilliC() as TxTimer;
     components new TimerMilliC() as RxTimer;
+    components new TimerMilliC() as RTCTimer;
     OpoVisualDemoP.TxTimer -> TxTimer;
     OpoVisualDemoP.RxTimer -> RxTimer;
+    OpoVisualDemoP.RTCTimer -> RTCTimer;
 
 }
