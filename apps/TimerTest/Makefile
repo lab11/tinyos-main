@@ -1,0 +1,4 @@
+COMPONENT=TimerTestC
+TINYOS_ROOT_DIR?=../..
+PFLAGS += -DNEW_PRINTF_SEMANTICS
+include $(TINYOS_ROOT_DIR)/Makefile.include
