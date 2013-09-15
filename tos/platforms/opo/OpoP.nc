@@ -180,6 +180,7 @@ implementation {
 
   command error_t Opo.disable_receive() {
     disableRx();
+    return SUCCESS;
   }
 
   async event void UltrasonicCapture.captured(uint16_t time) {
@@ -263,8 +264,6 @@ implementation {
 
   event void RfControl.startDone(error_t err) {
     call SFDCapture.setEdge(MSP430TIMER_CM_RISING);
-    printf("RFCS\n");
-    printfflush();
     if(opo_state == TX) {
       #ifdef OPO_DEBUG
       printf("OPO_RFS_TX\n");
@@ -339,33 +338,36 @@ implementation {
    * Specifically, this sets up TACCTL1, or Timer A Compare Output 1.
   */
   inline void setupUltrasonicPWM() {
+    atomic {
+      // Sets Port16 to be a Timer A module and an output.
+      P1SEL = P1SEL | BIT6;
+      P1DIR = P1DIR | BIT6;
 
-    // Sets Port16 to be a Timer A module and an output.
-    P1SEL = P1SEL | BIT6;
-    P1DIR = P1DIR | BIT6;
+      // Timer A PWM signal controlled by TACCR0 and TACCR1
+      // See Start and Stop Transducer for more.
+      // TACTl = Timer A Control Register
+      // TASSEL_2 = Timer A Clock Source select 2 - SMCLK
+      // ID_1 = Timer A Input (Clock) Divider - 2
+      // MC_1 = Mode Control - Up Mode
+      // TAIE = Interrupt Enabled
+      TACTL = 0x0000;
+      TACTL = TASSEL_2 | ID_1 | MC_1;
 
-    // Timer A PWM signal controlled by TACCR0 and TACCR1
-    // See Start and Stop Transducer for more.
-    // TACTl = Timer A Control Register
-    // TASSEL_2 = Timer A Clock Source select 2 - SMCLK
-    // ID_1 = Timer A Input (Clock) Divider - 2
-    // MC_1 = Mode Control - Up Mode
-    // TAIE = Interrupt Enabled
-    TACTL = 0x0000;
-    TACTL = TASSEL_2 | ID_1 | MC_1;
-
-    // Timer A Compare register settings
-    // CM0 = Capture Mode 0 - Compare instead of Capture
-    // CCIS_0 = Capture/compare input select done from CCI1A
-    // OUTMOD_3 = Outmode 3, PWM Set on TACCR1, Reset on TACCR0
-    // CCIE = Interrupt Enabled
-    TACCTL1 = 0x0000;
-    TACCTL1 = CM0 | CCIS_0 | OUTMOD_3 | CCIE;
+      // Timer A Compare register settings
+      // CM0 = Capture Mode 0 - Compare instead of Capture
+      // CCIS_0 = Capture/compare input select done from CCI1A
+      // OUTMOD_3 = Outmode 3, PWM Set on TACCR1, Reset on TACCR0
+      // CCIE = Interrupt Enabled
+      TACCTL1 = 0x0000;
+      TACCTL1 = CM0 | CCIS_0 | OUTMOD_3 | CCIE;
+    }
   }
 
   inline void setupTACTL() {
-    TACTL = 0x0000;
-    TACTL = TASSEL_2 | ID_1 | MC_1;
+    atomic {
+      TACTL = 0x0000;
+      TACTL = TASSEL_2 | ID_1 | MC_1;
+    }
   }
 
   /*
@@ -380,11 +382,13 @@ implementation {
       call TxGate.set();
       call SFDCapture.setEdge(MSP430TIMER_CM_NONE);
 
-      sfd_time = 0;
-      rx_msg = NULL;
-      range = 0;
-      u_time = 0;
-      opo_rx_state = RX_SETUP;
+      atomic {
+        sfd_time = 0;
+        rx_msg = NULL;
+        range = 0;
+        u_time = 0;
+        opo_rx_state = RX_SETUP;
+      }
 
       call RxTimer.startOneShot(30);
   }
@@ -393,7 +397,7 @@ implementation {
     call RxTimer.stop();
     call UltrasonicCapture.setEdge(MSP430TIMER_CM_NONE);
     call SFDCapture.setEdge(MSP430TIMER_CM_NONE);
-    opo_rx_state = RX_IDLE;
+    atomic opo_rx_state = RX_IDLE;
   }
 
 }
