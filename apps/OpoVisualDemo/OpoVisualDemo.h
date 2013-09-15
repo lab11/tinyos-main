@@ -10,7 +10,7 @@
 
 #define MAX_NODES     40
 
-#define OPO_DEBUG
+//#define OPO_DEBUG
 
 typedef nx_struct opo_visual_rf_msg {
     nx_uint8_t  tx_id[6];
