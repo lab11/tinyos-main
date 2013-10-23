@@ -17,6 +17,8 @@ module SimpleRadioP {
 }
 implementation {
 
+	enum {vreg_on, osc_on} startup_timer_state = vreg_on;
+
 	async command error_t SimpleRadio.turnOn() {
 		call VREG.makeOutput();
 		call VREG.set();
@@ -28,10 +30,16 @@ implementation {
 	}
 
 	event void CC2420StartUpAlarm.fired() {
-		call RESET.clr();
-		call RESET.set();
-		call SpiByte.write(CC2420_SXOSCON);
+		if (startup_timer_state == vreg_on) {
+			call RESET.clr();
+			call RESET.set();
+			call SpiByte.write(CC2420_SXOSCON);
+			startup_timer_state = osc_on;
+			call CC2420StartUpAlarm.start(32000);
+		}
+		else {
+			signal SimpleRadio.turnedOn();
+		}
 	}
-
 
 }
