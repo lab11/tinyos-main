@@ -30,6 +30,7 @@ implementation {
 	event void CC2420StartUpAlarm.fired() {
 		call RESET.clr();
 		call RESET.set();
+		call SpiByte.write(CC2420_SXOSCON);
 	}
 
 
