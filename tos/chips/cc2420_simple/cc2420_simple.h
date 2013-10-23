@@ -1,3 +1,6 @@
+#define CC2420_DEFAULT_RXCTRL1_B0B8 0x56
+#define CC2420_DEFAULT_RXCTRL1_B9B16 0x2A
+
 enum cc2420_config_reg_enums {
   CC2420_SNOP = 0x00,
   CC2420_SXOSCON = 0x01,
