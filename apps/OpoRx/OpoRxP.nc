@@ -1,4 +1,3 @@
-#include "printf.h"
 #include "OpoRx.h"
 
 module OpoRxP {
@@ -26,22 +25,16 @@ implementation {
         call IdReader.read(&m_id[0]);
 
         call At45dbPower.stop();
-        printf("Booted\n");
-        printfflush();
         call Opo.setup_pins();
         call Opo.enable_receive();
     }
 
     event void Opo.receive(uint32_t range, message_t* msg) {
-        printf("R: %lu\n", range);
-        printfflush();
         call RxTimer.startOneShot(50);
     }
 
     event void Opo.receive_failed() {
         fcount += 1;
-        printf("FC: %u\n", fcount);
-        printfflush();
         call RxTimer.startOneShot(50);
     }
 
@@ -51,10 +44,7 @@ implementation {
 
     event void Opo.transmit_done() {}
     event void Opo.transmit_failed() {}
-    event void Opo.enable_receive_failed() {
-        printf("ER Failed\n");
-        printfflush();
-    }
+    event void Opo.enable_receive_failed() {}
 
     event void CC2420Config.syncDone(error_t error) {}
 

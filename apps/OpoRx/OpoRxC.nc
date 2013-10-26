@@ -3,7 +3,7 @@
 configuration OpoRxC {}
 
 implementation {
-    components MainC, LedsC, PrintfC, SerialStartC, OpoRxP;
+    components MainC, LedsC, SerialStartC, OpoRxP;
     OpoRxP.Boot -> MainC.Boot;
     OpoRxP.Leds -> LedsC.Leds;
 
