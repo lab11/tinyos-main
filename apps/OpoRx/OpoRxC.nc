@@ -15,15 +15,17 @@ implementation {
     OpoRxP.Opo -> OpoC.Opo;
 
     components ActiveMessageC;
-    components new AMSenderC(OPO) as OpoRfSend;
-    components new AMReceiverC(OPO) as OpoRfReceive;
+    components new AMSenderC(OPO_RX_TX) as OpoRfSend;
+    components new AMReceiverC(OPO_RX_TX) as OpoRfReceive;
     components new AMSenderC(OPO_RX_BASE) as BaseSend;
 
     OpoRxP.Packet -> ActiveMessageC.Packet;
     OpoRxP.BaseSend -> BaseSend;
+    OpoRxP.RfControl -> ActiveMessageC.SplitControl;
     OpoC.AMSend -> OpoRfSend;
     OpoC.AMReceive -> OpoRfReceive;
     OpoC.RfControl -> ActiveMessageC.SplitControl;
+
 
     components CC2420ControlC;
     OpoRxP.CC2420Config -> CC2420ControlC.CC2420Config;
@@ -32,5 +34,7 @@ implementation {
     OpoRxP.At45dbPower -> At45dbPowerC;
 
     components new TimerMilliC() as RxTimer;
+    components new TimerMilliC() as BaseTimer;
     OpoRxP.RxTimer -> RxTimer;
+    OpoRxP.BaseTimer -> BaseTimer;
 }
