@@ -36,11 +36,16 @@ typedef nx_struct opo_visual_base_msg {
     nx_uint8_t h;
 } ovis_base_msg_t;
 
+typedef nx_struct opo_rx_base_msg {
+    nx_uint8_t  rx_id[6];
+    nx_uint32_t range;
+} opo_rx_base_msg_t;
 
 enum {
     OPO_DATA = 20,
     OPO_BLINK = 21,
-    OPO_VISUAL_BASE = 22
+    OPO_VISUAL_BASE = 22,
+    OPO_RX_BASE = 23
 };
 
 #endif

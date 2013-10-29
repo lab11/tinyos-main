@@ -6,6 +6,7 @@ module OpoBaseP {
     interface Receive as OpoReceive;
     interface Receive as BlinkReceive;
     interface Receive as VisualReceive;
+    interface Receive as RxReceive;
     interface SplitControl as RfControl;
     interface AMPacket;
     interface Boot;
@@ -92,6 +93,20 @@ implementation {
     printf("TIME:%u\n", total_time);
 
     printfflush();
+    return msg;
+  }
+
+  event message_t* RxReceive.receive(message_t *msg, void *payload, uint8_t len) {
+    opo_rx_base_msg_t *data = (opo_rx_base_msg_t *) payload;
+    int i;
+
+    printf("RX_ID: 0x");
+    for(i=0; i<6; i++) {
+      printf("%x", data->rx_id[i]);
+    }
+    printf("\n");
+
+    printf("Range: %u\n", data->range);
     return msg;
   }
 
