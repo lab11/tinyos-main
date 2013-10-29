@@ -13,8 +13,14 @@ typedef nx_struct opo_range_msg {
     nx_uint8_t  m_id[6];
 } opo_rf_msg_t;
 
+typedef nx_struct opo_rx_base_msg {
+    nx_uint8_t  rx_id[6];
+    nx_uint32_t range;
+} ovis_base_msg_t;
+
 enum {
     OPO = 17,
+    OPO_RX_BASE = 23,
     BASE = 20,
     PREP = 5
 };

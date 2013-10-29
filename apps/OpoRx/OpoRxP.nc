@@ -11,6 +11,7 @@ module OpoRxP {
         interface Packet;
         interface Opo;
         interface Timer<TMilli> as RxTimer;
+        interface AMSend as BaseSend;
     }
 }
 

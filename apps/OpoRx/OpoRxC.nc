@@ -17,8 +17,10 @@ implementation {
     components ActiveMessageC;
     components new AMSenderC(OPO) as OpoRfSend;
     components new AMReceiverC(OPO) as OpoRfReceive;
+    components new AMSenderC(OPO_RX_BASE) as BaseSend;
 
     OpoRxP.Packet -> ActiveMessageC.Packet;
+    OpoRxP.BaseSend -> BaseSend;
     OpoC.AMSend -> OpoRfSend;
     OpoC.AMReceive -> OpoRfReceive;
     OpoC.RfControl -> ActiveMessageC.SplitControl;
