@@ -176,6 +176,7 @@ implementation {
     else {
       setupRx();
     }
+    return SUCCESS;
   }
 
   command error_t Opo.disable_receive() {
