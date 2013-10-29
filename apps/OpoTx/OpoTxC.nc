@@ -15,9 +15,9 @@ implementation {
     OpoTxP.Opo -> OpoC.Opo;
 
     components ActiveMessageC;
-    components new AMSenderC(OPO) as OpoRfSend;
+    components new AMSenderC(OPO_RX_TX) as OpoRfSend;
     components new AMSenderC(PREP) as PrepSend;
-    components new AMReceiverC(OPO) as OpoRfReceive;
+    components new AMReceiverC(OPO_RX_TX) as OpoRfReceive;
 
     //OpoTxP.RfControl -> ActiveMessageC.SplitControl;
     OpoTxP.PrepSend -> PrepSend;

@@ -14,8 +14,8 @@ typedef nx_struct opo_range_msg {
 } opo_rf_msg_t;
 
 enum {
-    OPO = 17,
-    PREP = 5
+    OPO_RX_TX = 13,
+    PREP = 33
 };
 
 #endif
