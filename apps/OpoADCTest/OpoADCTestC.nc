@@ -1,0 +1,32 @@
+configuration OpoADCTestC {
+
+}
+implementation {
+	components MainC, LedsC, OpoADCTestP;
+	OpoADCTestP.Boot -> MainC.Boot;
+	OpoADCTestP.Leds -> LedsC.Leds;
+
+	components new Msp430Adc12ClientC() as OpoADC;
+	OpoADCTestP.ReadSingleChannel -> OpoADC.Msp430Adc12SingleChannel;
+
+	components HplMsp430GeneralIOC as GpIO;
+	OpoADCTestP.UCapGpIO -> GpIO.Port43;
+	OpoADCTestP.SFDCapGpIO -> GpIO.Port41;
+	OpoADCTestP.SFDLatch -> GpIO.Port52;
+	OpoADCTestP.TxRxSel -> GpIO.Port50;
+	OpoADCTestP.TxGate -> GpIO.Port53;
+	OpoADCTestP.Adc0 -> GpIO.Port60;
+
+  	components Msp430TimerC;
+  	OpoADCTestP.UltrasonicCapture -> Msp430TimerC.CaptureB3;
+  	OpoADCTestP.UCapControl -> Msp430TimerC.ControlB3;
+  	OpoADCTestP.TimerB -> Msp430TimerC.TimerB;
+
+  	components ActiveMessageC;
+  	components new AMSenderC(OPO_ADC_BASE) as OpoAdcRf;
+  	OpoADCTestP.RfControl -> ActiveMessageC.SplitControl;
+  	OpoADCTestP.AMSend -> OpoAdcRf.AMSend;
+
+  	components new TimerMilliC() as RxTimer;
+  	OpoADCTestP.RxTimer -> RxTimer;
+}
