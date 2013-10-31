@@ -7,6 +7,7 @@ module OpoBaseP {
     interface Receive as BlinkReceive;
     interface Receive as VisualReceive;
     interface Receive as RxReceive;
+    interface Receive as ADCReceive;
     interface SplitControl as RfControl;
     interface AMPacket;
     interface Boot;
@@ -107,6 +108,20 @@ implementation {
     printf("\n");
 
     printf("Range: %u\n", data->range);
+    return msg;
+  }
+
+  event message_t* ADCReceive.receive(message_t *msg, void *payload, uint8_t len) {
+    opo_adc_msg_t *data = (opo_adc_msg_t *) payload;
+    int i;
+
+    printf("Readings: \n");
+    for(i = 0; i < 20; i++) {
+      printf("%u\n", data->readings[i]);
+    }
+    printf("t1: %u\n", data->t1);
+    printf("t2: %u\n", data->t2);
+
     return msg;
   }
 

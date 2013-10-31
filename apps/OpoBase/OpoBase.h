@@ -41,11 +41,18 @@ typedef nx_struct opo_rx_base_msg {
     nx_uint32_t range;
 } opo_rx_base_msg_t;
 
+typedef nx_struct opo_adc_msg {
+    nx_uint16_t readings[20];
+    nx_uint16_t t1;
+    nx_uint16_t t2;
+} opo_adc_msg_t;
+
 enum {
     OPO_DATA = 20,
     OPO_BLINK = 21,
     OPO_VISUAL_BASE = 22,
-    OPO_RX_BASE = 23
+    OPO_RX_BASE = 23,
+    OPO_ADC_BASE = 24
 };
 
 #endif
