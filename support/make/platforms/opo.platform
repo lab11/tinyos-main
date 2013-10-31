@@ -36,6 +36,7 @@ PFLAGS += -I%T/chips/msp430/sensors
 PFLAGS += -I%T/chips/at45db
 PFLAGS += -I%T/lib/onewire
 PFLAGS += -I%T/lib/timer
+PFLAGS += -I%T/lib/adc
 PFLAGS += -I%T/lib/serial
 PFLAGS += -I%T/lib/power
 PFLAGS += -I%T/lib/printf
