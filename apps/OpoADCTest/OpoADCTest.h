@@ -3,7 +3,7 @@
 
 #define CC2420_DEF_CHANNEL 16
 
-#define M_SAMPLES 120
+#define M_SAMPLES 600
 
 typedef nx_struct opo_adc_msg {
     nx_uint16_t readings[12];

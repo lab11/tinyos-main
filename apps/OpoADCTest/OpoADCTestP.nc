@@ -5,6 +5,7 @@ module OpoADCTestP {
 	uses {
 		interface Timer<TMilli> as RxTimer;
 		interface Timer<TMilli> as RfTimer;
+		interface Timer<TMilli> as AdcTimer;
 		interface Msp430Adc12SingleChannel as ReadSingleChannel;
 		interface Resource as AdcResource;
 		interface HplMsp430GeneralIO as UCapGpIO;
@@ -71,13 +72,14 @@ implementation {
 	    call UltrasonicCapture.setEdge(MSP430TIMER_CM_NONE);
 	    call UCapControl.clearPendingInterrupt();
 	    t0 = time;
-	    call TimingLatch.clr();
-	    call ReadSingleChannel.getData();
+	    call AdcTimer.startOneShot(44);
+	    //call ReadSingleChannel.getData();
   	}
 
   	async event error_t ReadSingleChannel.singleDataReady(uint16_t data) {
   		m_buffer[i] = data;
   		i += 1;
+  		call TimingLatch.set();
   		if(i < 20) {
   			call ReadSingleChannel.getData();
   		}
@@ -148,6 +150,11 @@ implementation {
 
 	event void RfTimer.fired() {
 		call RfControl.start();
+	}
+
+	event void AdcTimer.fired() {
+		call TimingLatch.clr();
+		call ReadSingleChannel.getData();
 	}
 
 	async event void TimerB.overflow() {}

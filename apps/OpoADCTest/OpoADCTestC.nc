@@ -9,7 +9,7 @@ implementation {
 	components new Msp430Adc12ClientC() as OpoADC;
   //components new Msp430Adc12ClientAutoDMAC() as OpoADC;
 	OpoADCTestP.ReadSingleChannel -> OpoADC.Msp430Adc12SingleChannel;
-  OpoADCTestP.AdcResource -> OpoADC.Resource;
+ 	OpoADCTestP.AdcResource -> OpoADC.Resource;
 
 	components HplMsp430GeneralIOC as GpIO;
 	OpoADCTestP.UCapGpIO -> GpIO.Port43;
@@ -18,7 +18,7 @@ implementation {
 	OpoADCTestP.TxRxSel -> GpIO.Port50;
 	OpoADCTestP.TxGate -> GpIO.Port53;
 	OpoADCTestP.Adc0 -> GpIO.Port60;
-  OpoADCTestP.TimingLatch -> GpIO.Port17;
+  	OpoADCTestP.TimingLatch -> GpIO.Port17;
 
 	components Msp430TimerC;
 	OpoADCTestP.UltrasonicCapture -> Msp430TimerC.CaptureB3;
@@ -31,8 +31,9 @@ implementation {
 	OpoADCTestP.AMSend -> OpoAdcRf.AMSend;
 
 	components new TimerMilliC() as RxTimer;
-  components new TimerMilliC() as RfTimer;
+  	components new TimerMilliC() as RfTimer;
+  	components new TimerMilliC() as AdcTimer;
 	OpoADCTestP.RxTimer -> RxTimer;
-  OpoADCTestP.RfTimer -> RfTimer;
-
+  	OpoADCTestP.RfTimer -> RfTimer;
+  	OpoADCTestP.AdcTimer -> AdcTimer;
 }
