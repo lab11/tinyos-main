@@ -10,8 +10,9 @@ module IdPrinterP {
 implementation {
     uint8_t id[6];
     uint8_t i;
-    Boot.booted() {
-        call IdReader.read(&id);
+
+    event void Boot.booted() {
+        call IdReader.read(&id[0]);
         printf("Id: 0x");
         for(i=0; i < 6; i++) {
             printf("%x", id[i]);
