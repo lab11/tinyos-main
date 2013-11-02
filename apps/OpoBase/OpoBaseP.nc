@@ -74,14 +74,18 @@ implementation {
     int i;
     uint32_t total_time;
 
-    printf("GID:2\n");
-    printf("RANGE:%u\n", data->range);
-    printf("RX_ID:0x");
+    printf("GID: 2\n");
+    printf("RF_TIME: %u\n", data->t_rf);
+    printf("ULTRASONIC_TIME: %u\n", data->t_ultrasonic);
+    printf("TIME_DIFF: %u\n", (data->t_ultrasonic - data->t_rf) );
+
+    printf("RX_ID: 0x");
     for(i=0; i < 6; i++) {
       printf("%x", data->rx_id[i]);
     }
     printf("\n");
-    printf("TX_ID:0x");
+
+    printf("TX_ID: 0x");
     for(i=0; i < 6; i++) {
       printf("%x", data->tx_id[i]);
     }
@@ -91,7 +95,7 @@ implementation {
     total_time += data->min * 60;
     total_time += data->h * 3600;
 
-    printf("TIME:%u\n", total_time);
+    printf("TIME: %u\n", total_time);
 
     printfflush();
     return msg;
