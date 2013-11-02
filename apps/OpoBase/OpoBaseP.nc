@@ -115,12 +115,14 @@ implementation {
     opo_adc_msg_t *data = (opo_adc_msg_t *) payload;
     int i;
 
-    printf("Readings: \n");
-    for(i = 0; i < 20; i++) {
+    printf("Readings Times: \n");
+    for(i = 0; i < 12; i++) {
       printf("%u\n", data->readings[i]);
     }
+
+    printf("t0: %u\n", data->t0);
     printf("t1: %u\n", data->t1);
-    printf("t2: %u\n", data->t2);
+    printf("----------------------\n");
 
     return msg;
   }
