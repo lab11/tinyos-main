@@ -28,6 +28,7 @@ implementation {
     message_t packet;
     message_t base_packet;
     ovis_base_msg_t *bp;
+    ovis_msg_t *opo_data;
     uint32_t tx_interval_min = 0;
     uint8_t m_id[6];
     uint32_t guard;
@@ -35,6 +36,7 @@ implementation {
     uint32_t t0;
     uint32_t tn;
     uint32_t rt;
+    uint8_t i;
 
     enum {ENABLE_RX, BASE_SEND} ovis_rx_state = ENABLE_RX;
 
@@ -42,7 +44,6 @@ implementation {
     uint16_t getInteractions(message_t* msg);
 
     event void Boot.booted() {
-        uint8_t i;
         ovis_msg_t *p;
 
         call Opo.setup_pins();
@@ -100,8 +101,8 @@ implementation {
 
         call RxTimer.stop();
         setGuardTime();
-        call TxTimer.startOneShot(1500 + (guard*40));
-        call RxTimer.startOneShot(200);
+        call TxTimer.startOneShot(2000 + rt);
+        call RxTimer.startOneShot(70);
     }
 
     event void Opo.transmit_failed() {
@@ -113,9 +114,7 @@ implementation {
         call TxTimer.startOneShot(500 + (guard*2));
     }
 
-    event void Opo.receive(uint32_t range, message_t* msg) {
-        uint8_t i;
-        ovis_msg_t *data = call Packet.getPayload(msg, sizeof(ovis_msg_t));
+    event void Opo.receive(uint16_t t_rf, uint16_t t_ultrasonic, message_t* msg) {
         #ifdef OPO_DEBUG
         printf("Range: %lu\n", range);
         printfflush();
@@ -127,14 +126,17 @@ implementation {
         dt = call TxTimer.getdt();
         rt = dt - (tn - t0);
 
-        bp->range = range;
+        opo_data = call Packet.getPayload(msg, sizeof(ovis_msg_t));
+
+        bp->t_rf = t_rf;
+        bp->t_ultrasonic = t_ultrasonic;
         for(i=0; i<6; i++) {
-            bp->tx_id[i] = data->tx_id[i];
+            bp->tx_id[i] = opo_data->tx_id[i];
         }
 
         ovis_rx_state = BASE_SEND;
         call CC2420Config.setChannel(BASE_CHANNEL);
-        call RxTimer.startOneShot(5 + guard);
+        call RxTimer.startOneShot(5 + (guard % 40) );
     }
 
     event void Opo.receive_failed() {
@@ -209,7 +211,7 @@ implementation {
 
     inline void setGuardTime() {
         guard = call Random.rand32();
-        guard = (guard % 51);
+        guard = guard % 2000;
     }
 
 }

@@ -19,12 +19,12 @@ typedef nx_struct opo_visual_rf_msg {
 typedef nx_struct opo_visual_base_msg {
     nx_uint8_t  rx_id[6];
     nx_uint8_t  tx_id[6];
-    nx_uint32_t range;
+    nx_uint16_t t_rf;
+    nx_uint16_t t_ultrasonic;
     nx_uint8_t sec;
     nx_uint8_t min;
     nx_uint8_t h;
 } ovis_base_msg_t;
-
 
 enum {
     OPO_VISUAL_DEMO = 12,
