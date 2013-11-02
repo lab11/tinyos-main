@@ -47,9 +47,8 @@ implementation {
   message_t *rx_msg;
 
   // Timing and ranging
-  uint32_t sfd_time = 0; // SFD trigger time.
-  uint32_t u_time = 0;
-  uint32_t range = 0; // Based on ToF difference between rf and ultrasonic
+  uint32_t t_rf = 0; // SFD trigger time.
+  uint32_t t_ultrasonic = 0;
 
   /* Helper function prototypes */
   void startTransducer(); // starts PWM to drive Ultrasonic Transducers
@@ -194,10 +193,7 @@ implementation {
       call RxTimer.startOneShot(40);
     }
     else {
-        u_time = time;
-        if (time > sfd_time && sfd_time != 0) {
-          range = (time - sfd_time) * 10634; // range in microm
-        }
+        t_ultrasonic = time;
     }
 
     if (call UltrasonicCapture.isOverflowPending()) {
@@ -206,8 +202,8 @@ implementation {
   }
 
   async event void SFDCapture.captured(uint16_t time) {
-    if(opo_rx_state == RX_DONE && sfd_time == 0) {
-      sfd_time = time;
+    if(opo_rx_state == RX_DONE) {
+      t_rf = time;
       call UltrasonicCapture.setEdge(MSP430TIMER_CM_RISING);
     }
     else if(opo_state == TX) {
@@ -249,8 +245,8 @@ implementation {
       printfflush();
       #endif
       call RfControl.stop();
-      if(range > 0 && rx_msg != NULL) {
-        signal Opo.receive(range, rx_msg);
+      if(t_ultrasonic > t_rf && rx_msg != NULL) {
+        signal Opo.receive(t_rf, t_ultrasonic, rx_msg);
       }
       else {
         signal Opo.receive_failed();
@@ -384,10 +380,9 @@ implementation {
       call SFDCapture.setEdge(MSP430TIMER_CM_NONE);
 
       atomic {
-        sfd_time = 0;
+        t_rf = 0;
+        t_ultrasonic = 0;
         rx_msg = NULL;
-        range = 0;
-        u_time = 0;
         opo_rx_state = RX_SETUP;
       }
 

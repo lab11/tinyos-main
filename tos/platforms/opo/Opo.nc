@@ -12,7 +12,7 @@ interface Opo {
 	command error_t disable_receive();
     event void enable_receive_failed();
 
-	event void receive(uint32_t range, message_t* msg);
+	event void receive(uint16_t t_rf, uint16_t t_ultrasonic, message_t* msg);
 	event void receive_failed();
 
     command error_t setup_pins();
