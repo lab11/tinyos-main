@@ -20,6 +20,7 @@ module RandomMtC {
     interface Random;
   }
   uses {
+    interface Leds;
     interface ReadId48 as IdReader;
   }
 }
@@ -31,7 +32,16 @@ implementation {
 
   command error_t Init.init() {
     int i;
-    call IdReader.read(&m_id[0]);
+    uint32_t sum;
+
+    for(;;) {
+      call IdReader.read(&m_id[0]);
+      for(i = 0; i < 6; i++) {
+          sum += m_id[i];
+      }
+      if(sum != 0)
+          break;
+    }
 
     for(i = 3; i >= 0; i--) {
       mt[0] <<= 8;
