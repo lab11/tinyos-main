@@ -18,7 +18,7 @@ while True:
     data = json.dumps(packet)
     d_len = len(data)
 
-    url = 'http://fusion.eecs.umich.edu/receive_data'
+    url = 'http://opo.eecs.umich.edu/receive_data'
     req = urllib2.Request(url, data, {'Content-Type': 'application/json',
                                       'Content-Length': d_len})
     try:
