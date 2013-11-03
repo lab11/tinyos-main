@@ -1,40 +1,33 @@
 import sys
 import urllib2
 import json
-
-packet = {'G_ID': 2}
+import time
 
 while True:
+    packet = {}
+
     line = sys.stdin.readline()
-    if ":" in line:
-        s = line.split(":")
-        if "ID" in line:
-            packet[s[0]] = int(s[1].strip(), 16)
-        else:
-            packet[s[0]] = int(s[1].strip())
-        if "RANGE" in line:
-            r = float(s[1].strip()) / 1000000.0
-            packet['RANGE'] = r
-        if "TIME" in line:
-            if len(packet) == 8:
-                print packet
-                data = json.dumps(packet)
-                d_len = len(data)
-                url = 'http://fusion.eecs.umich.edu/raw_update'
-                req = urllib2.Request(url, data, {'Content-Type': 'application/json',
-                                                  'Content-Length': d_len})
-                try:
-                    r = urllib2.urlopen(req)
-                except urllib2.HTTPError, e:
-                    print "HTTP ERROR"
-                    print "Code: " + str(e.code)
-                    print "Msg: " + str(e.msg)
-                    print "Hdrs: " + str(e.hdrs)
-                    print "fp: " + str(e.fp)
-                print "Correct Packet"
-                print str(r.read())
-            else:
-                print "Misformed Packet"
-                print str(packet)
-                print "--------------------"
-            packet = {'G_ID': 2}
+    s = line.strip().split()
+
+    packet['rx_id'] = int(s[3], 16)
+    packet['tx_id'] = int(s[4], 16)
+    packet['range'] = (float(s[2]) - float(s[1])) / 32000 * 340.29 - .08)
+    packet['time'] = time.mktime(time.gmtime())
+    packet['rtc_time'] = int(s[5])
+
+    data = json.dumps(packet)
+    d_len = len(data)
+
+    url = 'http://fusion.eecs.umich.edu/receive_data'
+    req = urllib2.Request(url, data, {'Content-Type': 'application/json',
+                                      'Content-Length': d_len})
+    try:
+        r = urllib2.urlopen(req)
+    except urllib2.HTTPError, e:
+        print "HTTP ERROR"
+        print "Code: " + str(e.code)
+        print "Msg: " + str(e.msg)
+        print "Hdrs: " + str(e.hdrs)
+        print "fp: " + str(e.fp)
+    except:
+        print "unkown exception"
