@@ -11,7 +11,7 @@ while True:
 
     packet['rx_id'] = int(s[3], 16)
     packet['tx_id'] = int(s[4], 16)
-    packet['range'] = (float(s[2]) - float(s[1])) / 32000 * 340.29 - .08)
+    packet['range'] = (float(s[2]) - float(s[1])) / 32000 * 340.29 - .08
     packet['time'] = time.mktime(time.gmtime())
     packet['rtc_time'] = int(s[5])
 
