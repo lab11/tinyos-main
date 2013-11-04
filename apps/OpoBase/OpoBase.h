@@ -53,7 +53,8 @@ enum {
     OPO_BLINK = 21,
     OPO_VISUAL_BASE = 22,
     OPO_RX_BASE = 23,
-    OPO_ADC_BASE = 24
+    OPO_ADC_BASE = 24,
+    OPO_VISUAL_STORE_BASE = 25
 };
 
 #endif
