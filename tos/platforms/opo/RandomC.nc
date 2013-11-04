@@ -46,8 +46,8 @@ configuration RandomC {
 }
 
 implementation {
-  components RandomMtC, MainC;
-
+  components RandomMtC, MainC, LedsC;
+  RandomMtC.Leds -> LedsC.Leds;
   MainC.SoftwareInit -> RandomMtC;
 
   Init = RandomMtC;

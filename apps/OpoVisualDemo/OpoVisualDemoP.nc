@@ -30,6 +30,7 @@ implementation {
     ovis_base_msg_t *bp;
     ovis_msg_t *opo_data;
     uint32_t tx_interval_min = 0;
+    uint32_t tx_count;
     uint8_t m_id[6];
     uint32_t guard;
     uint32_t dt;
@@ -44,22 +45,33 @@ implementation {
     uint16_t getInteractions(message_t* msg);
 
     event void Boot.booted() {
+        uint32_t sum;
         ovis_msg_t *p;
 
         call Opo.setup_pins();
-        call IdReader.read(&m_id[0]);
+
         call PacketAcks.noAck(&packet);
         call PacketAcks.noAck(&base_packet);
         setGuardTime();
 
+        for(;;) {
+            call IdReader.read(&m_id[0]);
+            for(i = 0; i < 6; i++) {
+                sum += m_id[i];
+            }
+            if(sum != 0)
+                break;
+        }
+
         p = (ovis_msg_t*) call Packet.getPayload(&packet,
-                                                   sizeof(ovis_msg_t));
+                                                 sizeof(ovis_msg_t));
         bp = (ovis_base_msg_t*) call Packet.getPayload(&base_packet,
-                                                         sizeof(ovis_base_msg_t));
+                                                       sizeof(ovis_base_msg_t));
         for(i = 0; i < 6; i++) {
             p -> tx_id[i] = m_id[i];
             bp -> rx_id[i] = m_id[i];
         }
+
 
         call HplRV4162.writeSTBit();
 
@@ -101,6 +113,7 @@ implementation {
 
         call RxTimer.stop();
         setGuardTime();
+        tx_count += 1;
         call TxTimer.startOneShot(2000 + guard);
         call RxTimer.startOneShot(70);
     }
