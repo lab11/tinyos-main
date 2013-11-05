@@ -4,8 +4,7 @@
 case "$1" in
 start)
 echo "Starting Opo Visual Base Station"
-cd /home/wwhuang
-sudo /home/wwhuang/OpoBaseC | python web_export.py
+sudo /home/wwhuang/OpoBaseC | python /home/wwhuang/web_export.py
 ;;
 stop)
 echo "Stopping Opo Visual Base Station"
