@@ -19,8 +19,8 @@ implementation {
 
   event void Boot.booted() {
     call RfControl.start();
-    printf("Booted\n");
-    printfflush();
+    //printf("Booted\n");
+    //printfflush();
   }
 
   event message_t* OpoReceive.receive(message_t *msg, void *payload, uint8_t len) {
