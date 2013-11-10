@@ -36,7 +36,7 @@ module OpoP {
 
 implementation {
 
-  #define U_PULSE_TIME 2
+  #define U_PULSE_TIME 1
 
   enum {RX, RX_PREP, TX, IDLE} opo_state = IDLE;
   enum {RX_SETUP, RX_WAKE, RX_RANGE, RX_DONE, RX_IDLE} opo_rx_state = RX_IDLE;
@@ -411,3 +411,4 @@ implementation {
   }
 
 }
+
