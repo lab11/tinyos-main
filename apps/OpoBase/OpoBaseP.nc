@@ -108,9 +108,12 @@ implementation {
     for(i=0; i<6; i++) {
       printf("%x", data->rx_id[i]);
     }
+    printf(" %u", data->t_rf);
+    printf(" %u", data->t_ultrasonic);
+    printf(" %u", data->t_ultrasonic_falling);
     printf("\n");
 
-    printf("Range: %u\n", data->range);
+    printfflush();
     return msg;
   }
 
@@ -118,13 +121,10 @@ implementation {
     opo_adc_msg_t *data = (opo_adc_msg_t *) payload;
     int i;
 
-    printf("Readings Times: \n");
-    for(i = 0; i < 12; i++) {
-      printf("%u\n", data->readings[i]);
+    for(i = 0; i < 6; i++) {
+      printf("24 %u %u %u \n", data->rf_time, data->readings[i], data->times[i]);
     }
 
-    printf("t0: %u\n", data->t0);
-    printf("t1: %u\n", data->t1);
     printf("----------------------\n");
 
     return msg;
