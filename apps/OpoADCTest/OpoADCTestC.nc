@@ -23,12 +23,17 @@ implementation {
 	components Msp430TimerC;
 	OpoADCTestP.UltrasonicCapture -> Msp430TimerC.CaptureB3;
 	OpoADCTestP.UCapControl -> Msp430TimerC.ControlB3;
+	OpoADCTestP.SFDCapture -> Msp430TimerC.CaptureB1;
+	OpoADCTestP.SFDCapControl -> Msp430TimerC.ControlB1;
 	OpoADCTestP.TimerB -> Msp430TimerC.TimerB;
 
 	components ActiveMessageC;
 	components new AMSenderC(OPO_ADC_BASE) as OpoAdcRf;
 	OpoADCTestP.RfControl -> ActiveMessageC.SplitControl;
 	OpoADCTestP.AMSend -> OpoAdcRf.AMSend;
+
+	components CC2420ControlC;
+    OpoADCTestP.CC2420Config -> CC2420ControlC.CC2420Config;
 
 	components new TimerMilliC() as RxTimer;
   	components new TimerMilliC() as RfTimer;
