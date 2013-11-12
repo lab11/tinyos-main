@@ -30,7 +30,7 @@ implementation {
     message_t base_packet;
     ovis_base_msg_t *bp;
     ovis_msg_t *opo_data;
-    uint32_t tx_interval_min = 0;
+    uint32_t tx_count = 0;
     uint8_t m_id[6];
     uint32_t guard;
     uint32_t dt;
@@ -178,6 +178,7 @@ implementation {
         if(ovis_rx_state == BASE_SEND) {
             ovis_rx_state = ENABLE_RX;
             call CC2420Config.setChannel(OPO_CHANNEL);
+            if(buffer_index == )
             call RxTimer.startOneShot(70);
             call TxTimer.startOneShot(rt);
         }
@@ -190,11 +191,13 @@ implementation {
     }
 
     event void BlockWrite.eraseDone(error_t err) {
-
+        call RxTimer.startOneShot(70);
+        call TxTimer.startOneShot(2000 + guard);
     }
 
     event void BlockWrite.syncDone(error_t err) {
-
+        call RxTimer.startOneShot(70);
+        call TxTimer.startOneShot(rt);
     }
 
     event void RTCTimer.fired() {
@@ -215,8 +218,7 @@ implementation {
     event void HplRV4162.setTimeDone(error_t err) {}
 
     event void HplRV4162.resetTimeDone(error_t err) {
-        call RxTimer.startOneShot(70);
-        call TxTimer.startOneShot(2000 + guard);
+        call BlockWrite.erase();
     }
 
     event void FlashPower.startDone(error_t err) {}
