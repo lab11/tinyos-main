@@ -36,7 +36,12 @@ implementation {
         call Opo.enable_receive();
     }
 
-    event void Opo.receive(uint16_t t_rf, uint16_t t_ultrasonic, uint16_t t_ultrasonic_falling, message_t* msg) {
+    event void Opo.receive(uint16_t t_rf,
+                           uint16_t t_ultrasonic_wake,
+                           uint16_t t_ultrasonic_wake_falling,
+                           uint16_t t_ultrasonic,
+                           uint16_t t_ultrasonic_falling,
+                           message_t* msg) {
         m_t_rf = t_rf;
         m_t_ultrasonic = t_ultrasonic;
         m_t_ultrasonic_falling = t_ultrasonic_falling;
