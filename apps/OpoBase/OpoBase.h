@@ -1,8 +1,8 @@
 #ifndef OPOBASE_H
 #define OPOBASE_H
 
-#define CC2420_DEF_CHANNEL 15
-#define CC2520_DEF_CHANNEL 15
+#define CC2420_DEF_CHANNEL 16
+#define CC2520_DEF_CHANNEL 16
 
 typedef nx_struct opo_rec_msg {
     nx_uint8_t valid; //validates data read from flash
@@ -55,7 +55,8 @@ enum {
     OPO_BLINK = 21,
     OPO_VISUAL_BASE = 22,
     OPO_RX_BASE = 23,
-    OPO_ADC_BASE = 24
+    OPO_ADC_BASE = 24,
+    OPO_VISUAL_STORE_BASE = 25
 };
 
 #endif
