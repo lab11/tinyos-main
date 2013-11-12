@@ -51,8 +51,8 @@ implementation {
 
     if (e == SUCCESS) {
       if (ds2411_check_crc(&ds2411id)) {
-        uint16_t id_sum;
-        uint8_t i;
+        uint16_t id_sum = 0;
+        uint8_t i = 0;
         for(i=0; i < DS2411_SERIAL_LENGTH; i++) {
           id_sum += ds2411id.serial[i];
         }
