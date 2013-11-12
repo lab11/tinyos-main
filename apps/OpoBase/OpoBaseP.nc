@@ -111,6 +111,7 @@ implementation {
     printf(" %u", data->t_rf);
     printf(" %u", data->t_ultrasonic);
     printf(" %u", data->t_ultrasonic_falling);
+    printf(" %u", data->t_ultrasonic_falling - data->t_ultrasonic);
     printf("\n");
 
     printfflush();
