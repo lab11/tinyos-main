@@ -7,9 +7,8 @@ implementation {
     OpoTxP.Boot -> MainC.Boot;
     OpoTxP.Leds -> LedsC.Leds;
 
-    components Ds2411C, RandomC;
+    components Ds2411C;
     OpoTxP.IdReader -> Ds2411C;
-    OpoTxP.Random -> RandomC;
 
     components OpoC;
     OpoTxP.Opo -> OpoC.Opo;

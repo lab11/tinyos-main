@@ -4,7 +4,6 @@ module OpoTxP {
     uses {
         interface Boot;
         interface Leds;
-        interface Random;
         interface ReadId48 as IdReader;
         interface SplitControl as At45dbPower;
         interface AMSend as PrepSend;
