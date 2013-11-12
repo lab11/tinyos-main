@@ -24,7 +24,10 @@ implementation {
     uint8_t   fcount = 0; // receive failed count
     uint8_t   m_id[6];
     uint8_t   i; // used for for loops
-    uint32_t m_range;
+    uint16_t m_t_rf;
+    uint16_t m_t_ultrasonic;
+    uint16_t m_t_ultrasonic_falling;
+    uint32_t guard;
 
     event void Boot.booted() {
         call IdReader.read(&m_id[0]);
@@ -33,10 +36,14 @@ implementation {
         call Opo.enable_receive();
     }
 
-    event void Opo.receive(uint32_t range, message_t* msg) {
-        m_range = range;
+    event void Opo.receive(uint16_t t_rf, uint16_t t_ultrasonic, uint16_t t_ultrasonic_falling, message_t* msg) {
+        m_t_rf = t_rf;
+        m_t_ultrasonic = t_ultrasonic;
+        m_t_ultrasonic_falling = t_ultrasonic_falling;
+
         call Leds.led0Toggle();
-        call BaseTimer.startOneShot(50);
+        guard = call Random.rand32() % 20;
+        call BaseTimer.startOneShot(50 + guard);
     }
 
     event void Opo.receive_failed() {
@@ -56,7 +63,10 @@ implementation {
         for(i = 0; i < 6; i++) {
             p->rx_id[i] = m_id[i];
         }
-        p->range = m_range;
+        p->t_rf = m_t_rf;
+        p->t_ultrasonic = m_t_ultrasonic;
+        p->t_ultrasonic_falling = m_t_ultrasonic_falling;
+
         base = BASE;
         call CC2420Config.setChannel(BASE_CHANNEL);
         call RfControl.start();

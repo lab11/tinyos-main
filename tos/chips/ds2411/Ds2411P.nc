@@ -51,7 +51,14 @@ implementation {
 
     if (e == SUCCESS) {
       if (ds2411_check_crc(&ds2411id)) {
-        haveId = TRUE;
+        uint16_t id_sum;
+        uint8_t i;
+        for(i=0; i < DS2411_SERIAL_LENGTH; i++) {
+          id_sum += ds2411id.serial[i];
+        }
+        if(id_sum != 0) {
+          haveId = TRUE;
+        }
       } else {
         e = EINVAL;
       }

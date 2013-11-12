@@ -36,10 +36,11 @@ module OpoP {
 
 implementation {
 
-  #define U_PULSE_TIME 2
+  #define U_PULSE_TIME 1
 
   enum {RX, RX_PREP, TX, IDLE} opo_state = IDLE;
   enum {RX_SETUP, RX_WAKE, RX_RANGE, RX_DONE, RX_IDLE} opo_rx_state = RX_IDLE;
+  enum {ULTRASONIC_WAKE, ULTRASONIC_RISING, ULTRASONIC_FALLING} opo_u_state = ULTRASONIC_WAKE;
   enum {TX_WAKE, TX_WAKE_STOP, TX_RANGE, TX_RANGE_STOP, TX_IDLE} opo_tx_state = TX_IDLE;
 
   message_t *tx_packet;
@@ -47,8 +48,9 @@ implementation {
   message_t *rx_msg;
 
   // Timing and ranging
-  uint32_t t_rf = 0; // SFD trigger time.
-  uint32_t t_ultrasonic = 0;
+  uint16_t t_rf = 0; // SFD trigger time.
+  uint16_t t_ultrasonic = 0; // Ultrasonic Rise Time
+  uint16_t t_ultrasonic_falling = 0; // Ultrasonic falling edge time
 
   /* Helper function prototypes */
   void startTransducer(); // starts PWM to drive Ultrasonic Transducers
@@ -192,8 +194,18 @@ implementation {
       opo_rx_state = RX_RANGE;
       call RxTimer.startOneShot(40);
     }
-    else {
+
+    if(opo_u_state == ULTRASONIC_WAKE) {
+      opo_u_state = ULTRASONIC_RISING;
+    }
+    else if(opo_u_state == ULTRASONIC_RISING) {
         t_ultrasonic = time;
+        opo_u_state = ULTRASONIC_FALLING;
+        call UltrasonicCapture.setEdge(MSP430TIMER_CM_FALLING);
+    }
+    else if(opo_u_state == ULTRASONIC_FALLING) {
+      t_ultrasonic_falling = time;
+      opo_u_state = ULTRASONIC_WAKE;
     }
 
     if (call UltrasonicCapture.isOverflowPending()) {
@@ -246,7 +258,7 @@ implementation {
       #endif
       call RfControl.stop();
       if(t_ultrasonic > t_rf && rx_msg != NULL) {
-        signal Opo.receive(t_rf, t_ultrasonic, rx_msg);
+        signal Opo.receive(t_rf, t_ultrasonic, t_ultrasonic_falling, rx_msg);
       }
       else {
         signal Opo.receive_failed();
@@ -382,8 +394,10 @@ implementation {
       atomic {
         t_rf = 0;
         t_ultrasonic = 0;
+        t_ultrasonic_falling = 0;
         rx_msg = NULL;
         opo_rx_state = RX_SETUP;
+        opo_u_state = ULTRASONIC_WAKE;
       }
 
       call RxTimer.startOneShot(30);
@@ -397,3 +411,4 @@ implementation {
   }
 
 }
+

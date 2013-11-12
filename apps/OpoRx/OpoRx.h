@@ -15,7 +15,9 @@ typedef nx_struct opo_range_msg {
 
 typedef nx_struct opo_rx_base_msg {
     nx_uint8_t  rx_id[6];
-    nx_uint32_t range;
+    nx_uint16_t t_rf;
+    nx_uint16_t t_ultrasonic;
+    nx_uint16_t t_ultrasonic_falling;
 } opo_rx_base_msg_t;
 
 enum {

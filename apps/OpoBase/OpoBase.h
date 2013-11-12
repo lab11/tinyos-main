@@ -1,8 +1,8 @@
 #ifndef OPOBASE_H
 #define OPOBASE_H
 
-#define CC2420_DEF_CHANNEL 16
-#define CC2520_DEF_CHANNEL 16
+#define CC2420_DEF_CHANNEL 15
+#define CC2520_DEF_CHANNEL 15
 
 typedef nx_struct opo_rec_msg {
     nx_uint8_t valid; //validates data read from flash
@@ -39,13 +39,15 @@ typedef nx_struct opo_visual_base_msg {
 
 typedef nx_struct opo_rx_base_msg {
     nx_uint8_t  rx_id[6];
-    nx_uint32_t range;
+    nx_uint16_t t_rf;
+    nx_uint16_t t_ultrasonic;
+    nx_uint16_t t_ultrasonic_falling;
 } opo_rx_base_msg_t;
 
 typedef nx_struct opo_adc_msg {
-    nx_uint16_t readings[12];
-    nx_uint16_t t0;
-    nx_uint16_t t1;
+    nx_uint16_t readings[6];
+    nx_uint16_t times[6];
+    nx_uint16_t rf_time;
 } opo_adc_msg_t;
 
 enum {
