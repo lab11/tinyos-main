@@ -104,13 +104,16 @@ implementation {
     opo_rx_base_msg_t *data = (opo_rx_base_msg_t *) payload;
     int i;
 
-    printf("RX_ID: 0x");
+    printf("0x");
     for(i=0; i<6; i++) {
       printf("%x", data->rx_id[i]);
     }
     printf(" %u", data->t_rf);
+    printf(" %u", data->t_ultrasonic_wake);
+    printf(" %u", data->t_ultrasonic_wake_falling);
     printf(" %u", data->t_ultrasonic);
     printf(" %u", data->t_ultrasonic_falling);
+    printf(" %u", data->t_ultrasonic_wake_falling - data->t_ultrasonic_wake);
     printf(" %u", data->t_ultrasonic_falling - data->t_ultrasonic);
     printf("\n");
 
