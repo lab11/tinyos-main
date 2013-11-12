@@ -2,8 +2,12 @@ import sys
 import urllib2
 import json
 import time
+import csv
 
 throwaway = sys.stdin.readline()
+current_time = time.mktime(time.gmtime())
+m_file = open('/home/wwhuang/visual_out-' + str(current_time) + '.csv', 'wb')
+writer = csv.writer(m_file, delimiter=' ')
 
 while True:
     packet = {}
@@ -20,6 +24,8 @@ while True:
         packet['time'] = time.mktime(time.gmtime())
         packet['rtc_time'] = int(s[5])
         print packet
+        writer.writerow(s)
+        m_file.flush()
         data = json.dumps(packet)
         d_len = len(data)
 
