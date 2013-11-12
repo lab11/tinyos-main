@@ -25,6 +25,8 @@ implementation {
     uint8_t   m_id[6];
     uint8_t   i; // used for for loops
     uint16_t m_t_rf;
+    uint16_t m_t_ultrasonic_wake;
+    uint16_t m_t_ultrasonic_wake_falling;
     uint16_t m_t_ultrasonic;
     uint16_t m_t_ultrasonic_falling;
     uint32_t guard;
@@ -43,6 +45,8 @@ implementation {
                            uint16_t t_ultrasonic_falling,
                            message_t* msg) {
         m_t_rf = t_rf;
+        m_t_ultrasonic_wake = t_ultrasonic_wake;
+        m_t_ultrasonic_wake_falling = t_ultrasonic_wake_falling;
         m_t_ultrasonic = t_ultrasonic;
         m_t_ultrasonic_falling = t_ultrasonic_falling;
 
@@ -69,6 +73,8 @@ implementation {
             p->rx_id[i] = m_id[i];
         }
         p->t_rf = m_t_rf;
+        p->t_ultrasonic_wake = m_t_ultrasonic_wake;
+        p->t_ultrasonic_wake_falling = m_t_ultrasonic_wake_falling;
         p->t_ultrasonic = m_t_ultrasonic;
         p->t_ultrasonic_falling = m_t_ultrasonic_falling;
 
