@@ -58,7 +58,12 @@ implementation {
 
     event void PrepSend.sendDone(message_t* bufPtr, error_t error) {}
 
-    event void Opo.receive(uint16_t t_rf, uint16_t t_ultrasonic, uint16_t t_ultrasonic_falling, message_t* msg) {}
+    event void Opo.receive(uint16_t t_rf,
+                           uint16_t t_ultrasonic_wake,
+                           uint16_t t_ultrasonic_wake_falling,
+                           uint16_t t_ultrasonic,
+                           uint16_t t_ultrasonic_falling,
+                           message_t* msg) {}
     event void Opo.receive_failed() {}
     event void Opo.transmit_failed() {}
     event void Opo.enable_receive_failed() {}
