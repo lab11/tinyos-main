@@ -52,7 +52,7 @@ implementation {
 
     event void Opo.transmit_done() {
         call Leds.led0Off();
-        call TxTimer.startOneShot(7000);
+        call TxTimer.startOneShot(10000);
     }
 
     event void PrepSend.sendDone(message_t* bufPtr, error_t error) {}
