@@ -51,8 +51,8 @@ implementation {
         m_t_ultrasonic_falling = t_ultrasonic_falling;
 
         call Leds.led0Toggle();
-        guard = call Random.rand32() % 20;
-        call BaseTimer.startOneShot(50 + guard);
+        guard = call Random.rand32() % 50;
+        call BaseTimer.startOneShot(100 + guard);
     }
 
     event void Opo.receive_failed() {
