@@ -127,7 +127,12 @@ implementation {
         call TxTimer.startOneShot(500 + (guard*2));
     }
 
-    event void Opo.receive(uint16_t t_rf, uint16_t t_ultrasonic, message_t* msg) {
+    event void Opo.receive(uint16_t t_rf,
+                           uint16_t t_ultrasonic_wake,
+                           uint16_t t_ultrasonic_wake_falling,
+                           uint16_t t_ultrasonic,
+                           uint16_t t_ultrasonic_falling,
+                           message_t* msg) {
         #ifdef OPO_DEBUG
         printf("Range: %lu\n", range);
         printfflush();
@@ -142,7 +147,10 @@ implementation {
         opo_data = call Packet.getPayload(msg, sizeof(ovis_msg_t));
 
         bp->t_rf = t_rf;
+        bp->t_ultrasonic_wake = t_ultrasonic_wake;
+        bp->t_ultrasonic_wake_falling = t_ultrasonic_wake_falling;
         bp->t_ultrasonic = t_ultrasonic;
+        bp->t_ultrasonic_falling = t_ultrasonic_falling;
         for(i=0; i<6; i++) {
             bp->tx_id[i] = opo_data->tx_id[i];
         }
