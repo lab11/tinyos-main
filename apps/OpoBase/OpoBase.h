@@ -31,7 +31,10 @@ typedef nx_struct opo_visual_base_msg {
     nx_uint8_t  rx_id[6];
     nx_uint8_t  tx_id[6];
     nx_uint16_t t_rf;
+    nx_uint16_t t_ultrasonic_wake;
+    nx_uint16_t t_ultrasonic_wake_falling;
     nx_uint16_t t_ultrasonic;
+    nx_uint16_t t_ultrasonic_falling;
     nx_uint8_t sec;
     nx_uint8_t min;
     nx_uint8_t h;

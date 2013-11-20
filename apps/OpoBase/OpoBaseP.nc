@@ -74,9 +74,7 @@ implementation {
     int i;
     uint32_t total_time;
 
-    printf("2 ");
-    printf("%u ", data->t_rf);
-    printf("%u ", data->t_ultrasonic);
+    printf("22 ");
 
     printf("0x");
     for(i=0; i < 6; i++) {
@@ -94,7 +92,13 @@ implementation {
     total_time += data->min * 60;
     total_time += data->h * 3600;
 
-    printf("%u\n", total_time);
+    printf("%u ", total_time);
+
+    printf("%u ", data->t_rf);
+    printf("%u ", data->t_ultrasonic_wake);
+    printf("%u ", data->t_ultrasonic_wake_falling);
+    printf("%u ", data->t_ultrasonic);
+    printf("%u\n", data->t_ultrasonic_falling);
 
     printfflush();
     return msg;
