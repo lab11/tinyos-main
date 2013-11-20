@@ -2,7 +2,8 @@ import csv
 import sys
 import time
 
-writer = csv.writer(open('visual.csv', 'wb'), delimiter=' ')
+m_file = open('visual.csv', 'wb')
+writer = csv.writer(m_file, delimiter=' ')
 throwaway = sys.stdin.readline()
 
 while True:
@@ -12,3 +13,4 @@ while True:
 	s = s.split()
 	s.append(current_time)
 	writer.writerow(s)
+	m_file.flush()
