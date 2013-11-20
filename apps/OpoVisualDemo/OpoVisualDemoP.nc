@@ -114,7 +114,7 @@ implementation {
         call RxTimer.stop();
         setGuardTime();
         tx_count += 1;
-        call TxTimer.startOneShot(2000 + guard);
+        call TxTimer.startOneShot(1000 + guard);
         call RxTimer.startOneShot(70);
     }
 
