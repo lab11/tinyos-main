@@ -268,7 +268,7 @@ implementation {
       if(t_ultrasonic > t_rf && rx_msg != NULL) {
         signal Opo.receive(t_rf,
                            t_ultrasonic_wake,
-                           t_ultrasonic_falling,
+                           t_ultrasonic_wake_falling,
                            t_ultrasonic,
                            t_ultrasonic_falling,
                            rx_msg);
