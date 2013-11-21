@@ -30,14 +30,12 @@ typedef nx_struct opo_blink_base_msg {
 typedef nx_struct opo_visual_base_msg {
     nx_uint8_t  rx_id[6];
     nx_uint8_t  tx_id[6];
-    nx_uint16_t t_rf;
-    nx_uint16_t t_ultrasonic_wake;
-    nx_uint16_t t_ultrasonic_wake_falling;
-    nx_uint16_t t_ultrasonic;
-    nx_uint16_t t_ultrasonic_falling;
-    nx_uint8_t sec;
-    nx_uint8_t min;
-    nx_uint8_t h;
+    nx_uint16_t ultrasonic_rf_dt;
+    nx_uint16_t ultrasonic_wake_dt;
+    nx_uint16_t ultrasonic_dt;
+    nx_uint16_t full_time;
+    nx_uint16_t seq;
+    nx_uint16_t rx_fails;
 } ovis_base_msg_t;
 
 typedef nx_struct opo_rx_base_msg {

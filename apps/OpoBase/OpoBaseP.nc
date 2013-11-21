@@ -72,7 +72,6 @@ implementation {
   event message_t* VisualReceive.receive(message_t *msg, void *payload, uint8_t len) {
     ovis_base_msg_t *data = (ovis_base_msg_t *) payload;
     int i;
-    uint32_t total_time;
 
     printf("22 ");
 
@@ -88,17 +87,13 @@ implementation {
     }
     printf(" ");
 
-    total_time = data->sec;
-    total_time += data->min * 60;
-    total_time += data->h * 3600;
+    printf("%u ", data->full_time);
 
-    printf("%u ", total_time);
-
-    printf("%u ", data->t_rf);
-    printf("%u ", data->t_ultrasonic_wake);
-    printf("%u ", data->t_ultrasonic_wake_falling);
-    printf("%u ", data->t_ultrasonic);
-    printf("%u\n", data->t_ultrasonic_falling);
+    printf("%u ", data->ultrasonic_rf_dt);
+    printf("%u ", data->ultrasonic_wake_dt);
+    printf("%u ", data->ultrasonic_dt);
+    printf("%u ", data->seq);
+    printf("%u\n", data->rx_fails);
 
     printfflush();
     return msg;
