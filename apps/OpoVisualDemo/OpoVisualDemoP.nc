@@ -29,6 +29,7 @@ implementation {
     message_t base_packet;
     ovis_base_msg_t *bp;
     ovis_msg_t *opo_data;
+    ovis_msg_t *p;
     uint32_t tx_interval_min = 0;
     uint32_t tx_count;
     uint8_t m_id[6];
@@ -38,6 +39,9 @@ implementation {
     uint32_t tn;
     uint32_t rt;
     uint8_t i;
+    uint32_t RX_DELAY = 15;
+    uint16_t rx_fails = 0;
+    uint16_t seq = 0;
 
     enum {ENABLE_RX, BASE_SEND} ovis_rx_state = ENABLE_RX;
 
@@ -46,7 +50,6 @@ implementation {
 
     event void Boot.booted() {
         uint32_t sum;
-        ovis_msg_t *p;
 
         call Opo.setup_pins();
 
@@ -101,6 +104,11 @@ implementation {
         printfflush();
         #endif
 
+        p = (ovis_msg_t*) call Packet.getPayload(&packet,
+                                                 sizeof(ovis_msg_t));
+        p->seq = seq;
+        seq += 1;
+
         call Opo.transmit(&packet, sizeof(ovis_msg_t));
     }
 
@@ -115,7 +123,7 @@ implementation {
         setGuardTime();
         tx_count += 1;
         call TxTimer.startOneShot(1000 + guard);
-        call RxTimer.startOneShot(70);
+        call RxTimer.startOneShot(RX_DELAY);
     }
 
     event void Opo.transmit_failed() {
@@ -124,7 +132,7 @@ implementation {
         printfflush();
         #endif
 
-        call TxTimer.startOneShot(500 + (guard*2));
+        //call TxTimer.startOneShot(500 + (guard*2));
     }
 
     event void Opo.receive(uint16_t t_rf,
@@ -138,6 +146,10 @@ implementation {
         printfflush();
         #endif
 
+        uint16_t ultrasonic_wake_dt = 0;
+        uint16_t ultrasonic_dt = 0;
+        uint16_t ultrasonic_rf_dt = 0;
+
         call TxTimer.stop();
         tn = call TxTimer.getNow();
         t0 = call TxTimer.gett0();
@@ -146,11 +158,22 @@ implementation {
 
         opo_data = call Packet.getPayload(msg, sizeof(ovis_msg_t));
 
-        bp->t_rf = t_rf;
-        bp->t_ultrasonic_wake = t_ultrasonic_wake;
-        bp->t_ultrasonic_wake_falling = t_ultrasonic_wake_falling;
-        bp->t_ultrasonic = t_ultrasonic;
-        bp->t_ultrasonic_falling = t_ultrasonic_falling;
+        if (t_ultrasonic_wake_falling > t_ultrasonic_wake) {
+            ultrasonic_wake_dt = t_ultrasonic_wake_falling - t_ultrasonic_wake;
+        }
+        if (t_ultrasonic_falling > t_ultrasonic) {
+            ultrasonic_dt = t_ultrasonic_falling - t_ultrasonic;
+        }
+        if (t_ultrasonic > t_rf) {
+            ultrasonic_rf_dt = t_ultrasonic - t_rf;
+        }
+
+        bp->ultrasonic_rf_dt = ultrasonic_rf_dt;
+        bp->ultrasonic_wake_dt = ultrasonic_wake_dt;
+        bp->ultrasonic_dt = ultrasonic_dt;
+        bp->seq = opo_data->seq;
+        bp->rx_fails = rx_fails;
+
         for(i=0; i<6; i++) {
             bp->tx_id[i] = opo_data->tx_id[i];
         }
@@ -165,7 +188,7 @@ implementation {
         printf("RxF\n");
         printfflush();
         #endif
-
+        rx_fails += 1;
         call RxTimer.startOneShot(100);
     }
 
@@ -198,7 +221,7 @@ implementation {
         if(ovis_rx_state == BASE_SEND) {
             ovis_rx_state = ENABLE_RX;
             call CC2420Config.setChannel(OPO_CHANNEL);
-            call RxTimer.startOneShot(70);
+            call RxTimer.startOneShot(RX_DELAY);
             call TxTimer.startOneShot(rt);
         }
     }
@@ -208,9 +231,8 @@ implementation {
     }
 
     event void HplRV4162.readFullTimeDone(error_t err, uint8_t *fullTime) {
-        bp->sec = fullTime[1];
-        bp->min = fullTime[2];
-        bp->h = fullTime[3];
+        uint16_t time = fullTime[1] + (fullTime[2] * 60) + (fullTime[3] * 60 * 60);
+        bp->full_time = fullTime[1];
         call RfControl.start();
     }
 
@@ -221,7 +243,7 @@ implementation {
     event void HplRV4162.setTimeDone(error_t err) {}
 
     event void HplRV4162.resetTimeDone(error_t err) {
-        call RxTimer.startOneShot(70);
+        call RxTimer.startOneShot(RX_DELAY);
         call TxTimer.startOneShot(2000 + guard);
     }
 
