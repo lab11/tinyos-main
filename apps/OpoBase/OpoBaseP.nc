@@ -93,7 +93,8 @@ implementation {
     printf("%u ", data->ultrasonic_wake_dt);
     printf("%u ", data->ultrasonic_dt);
     printf("%u ", data->seq);
-    printf("%u\n", data->rx_fails);
+    printf("%u ", data->rx_fails);
+    printf("%u\n", data->tx_fails);
 
     printfflush();
     return msg;
