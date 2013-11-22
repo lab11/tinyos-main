@@ -26,6 +26,7 @@ typedef nx_struct opo_visual_base_msg {
     nx_uint16_t full_time;
     nx_uint16_t seq;
     nx_uint16_t rx_fails;
+    nx_uint16_t tx_fails;
 } ovis_base_msg_t;
 
 enum {

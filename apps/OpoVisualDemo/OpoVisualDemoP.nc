@@ -31,7 +31,6 @@ implementation {
     ovis_msg_t *opo_data;
     ovis_msg_t *p;
     uint32_t tx_interval_min = 0;
-    uint32_t tx_count;
     uint8_t m_id[6];
     uint32_t guard;
     uint32_t dt;
@@ -39,8 +38,9 @@ implementation {
     uint32_t tn;
     uint32_t rt;
     uint8_t i;
-    uint32_t RX_DELAY = 15;
+    uint32_t RX_DELAY = 70;
     uint16_t rx_fails = 0;
+    uint16_t tx_fails = 0;
     uint16_t seq = 0;
 
     enum {ENABLE_RX, BASE_SEND} ovis_rx_state = ENABLE_RX;
@@ -107,7 +107,6 @@ implementation {
         p = (ovis_msg_t*) call Packet.getPayload(&packet,
                                                  sizeof(ovis_msg_t));
         p->seq = seq;
-        seq += 1;
 
         call Opo.transmit(&packet, sizeof(ovis_msg_t));
     }
@@ -121,7 +120,7 @@ implementation {
 
         call RxTimer.stop();
         setGuardTime();
-        tx_count += 1;
+        seq += 1;
         call TxTimer.startOneShot(1000 + guard);
         call RxTimer.startOneShot(RX_DELAY);
     }
@@ -131,8 +130,8 @@ implementation {
         printf("TxF\n");
         printfflush();
         #endif
-
-        //call TxTimer.startOneShot(500 + (guard*2));
+        tx_fails += 1;
+        call TxTimer.startOneShot(guard + 75);
     }
 
     event void Opo.receive(uint16_t t_rf,
@@ -154,7 +153,17 @@ implementation {
         tn = call TxTimer.getNow();
         t0 = call TxTimer.gett0();
         dt = call TxTimer.getdt();
-        rt = dt - (tn - t0);
+        if (tn > t0) {
+            if (dt > (tn - t0)) {
+                rt = dt - (tn - t0);
+            }
+            else {
+                rt = dt;
+            }
+        }
+        else {
+            rt = dt;
+        }
 
         opo_data = call Packet.getPayload(msg, sizeof(ovis_msg_t));
 
@@ -173,6 +182,7 @@ implementation {
         bp->ultrasonic_dt = ultrasonic_dt;
         bp->seq = opo_data->seq;
         bp->rx_fails = rx_fails;
+        bp->tx_fails = tx_fails;
 
         for(i=0; i<6; i++) {
             bp->tx_id[i] = opo_data->tx_id[i];
