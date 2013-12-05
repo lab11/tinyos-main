@@ -194,7 +194,7 @@ implementation {
 
     if(opo_rx_state == RX_WAKE) {
       opo_rx_state = RX_RANGE;
-      call RxTimer.startOneShot(40);
+      call RxTimer.startOneShot(48);
     }
 
     if(opo_u_state == ULTRASONIC_WAKE) {
