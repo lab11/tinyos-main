@@ -297,7 +297,7 @@ implementation {
     }
     else if(opo_state == RX) {
       opo_rx_state = RX_DONE;
-      call RxTimer.startOneShot(100);
+      call RxTimer.startOneShot(9);
     }
   }
 
@@ -413,7 +413,7 @@ implementation {
         opo_u_state = ULTRASONIC_WAKE;
       }
 
-      call RxTimer.startOneShot(30);
+      call RxTimer.startOneShot(40);
   }
 
   inline void disableRx() {

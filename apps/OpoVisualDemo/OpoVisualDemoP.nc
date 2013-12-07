@@ -38,7 +38,7 @@ implementation {
     uint32_t tn;
     uint32_t rt;
     uint8_t i;
-    uint32_t RX_DELAY = 70;
+    uint32_t RX_DELAY = 200;
     uint16_t rx_fails = 0;
     uint16_t tx_fails = 0;
     uint16_t seq = 0;
@@ -199,7 +199,7 @@ implementation {
         printfflush();
         #endif
         rx_fails += 1;
-        call RxTimer.startOneShot(100);
+        call RxTimer.startOneShot(RX_DELAY);
     }
 
     event void Opo.enable_receive_failed() {
@@ -208,7 +208,7 @@ implementation {
         printfflush();
         #endif
 
-        call RxTimer.startOneShot(100);
+        //call RxTimer.startOneShot(RX_DELAY);
     }
 
     event void BaseSend.sendDone(message_t *msg, error_t err) {
