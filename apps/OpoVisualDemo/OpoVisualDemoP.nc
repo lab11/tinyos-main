@@ -38,7 +38,7 @@ implementation {
     uint32_t tn;
     uint32_t rt;
     uint8_t i;
-    uint32_t RX_DELAY = 200;
+    uint32_t RX_DELAY = 70;
     uint16_t rx_fails = 0;
     uint16_t tx_fails = 0;
     uint16_t seq = 0;
