@@ -30,8 +30,8 @@ except GetoptError, err:
   print_usage()
   quit(1)
 
-sector_size = 256
-flash_size = 2048 # in sectors
+sector_size = 528
+flash_size = 4096 # in sectors
 
 cthreads = False
 tosdir = ""
